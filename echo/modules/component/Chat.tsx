@@ -11,38 +11,33 @@ export default function Chat() {
         { icon: DashboardIcon, label: "Dashboard", active: false },
         { icon: AddIcon, label: "Start new chat", active: false },
         { icon: CommentIcon, label: "AI chat", active: true },
-        { icon: DocumentIcon, label: "AI text generator", active: false },
-        { icon: ImageIcon, label: "AI image generator", active: false },
-        { icon: CodeIcon, label: "AI coding", active: false },
-        { icon: MicIcon, label: "AI text to speech", active: false },
-        { icon: DesktopIcon, label: "AI computer use", active: false },
     ];
 
     return (
         <div className="flex h-screen bg-[#F0F7FB]">
             {/* Sidebar */}
-            <aside className="flex w-[267px] flex-col justify-between border-r border-[#B7BCC9] px-7 py-10">
-                <div className="flex flex-col gap-[18px]">
+            <aside className="flex w-[200px] flex-col justify-between border-r border-[#B7BCC9] px-4 py-6 lg:w-[240px] lg:px-6 lg:py-8 xl:w-[267px] xl:px-7 xl:py-10">
+                <div className="flex flex-col gap-3 lg:gap-4 xl:gap-[18px]">
                     {/* Logo */}
                     <div className="flex flex-col gap-2">
-                        <h1 className="font-['IBM_Plex_Mono'] text-[40px] font-bold leading-[60px] text-[#3D2D4C]">
+                        <h1 className="font-['IBM_Plex_Mono'] text-[28px] font-bold leading-[42px] text-[#3D2D4C] lg:text-[32px] lg:leading-[48px] xl:text-[40px] xl:leading-[60px]">
                             Soft GPT
                         </h1>
                         <div className="h-px bg-[#B7BCC9]"></div>
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex flex-col gap-2.5">
+                    <nav className="flex flex-col gap-2 lg:gap-2.5">
                         {navItems.map((item, index) => (
                             <button
                                 key={index}
-                                className={`flex items-center gap-2.5 rounded px-2.5 py-2.5 ${
-                                    item.active ? "bg-[#8E12D5]" : ""
+                                className={`flex items-center gap-2 rounded px-2 py-2 transition-colors hover:bg-opacity-80 lg:gap-2.5 lg:px-2.5 ${
+                                    item.active ? "bg-[#8E12D5]" : "hover:bg-gray-100"
                                 }`}
                             >
                                 <item.icon active={item.active} />
                                 <span
-                                    className={`font-['Roboto'] text-lg font-bold leading-7 ${
+                                    className={`font-['Roboto'] text-base font-bold leading-6 lg:text-lg lg:leading-7 ${
                                         item.active ? "text-white" : "text-[#3D2D4C]"
                                     }`}
                                 >
@@ -54,16 +49,16 @@ export default function Chat() {
                 </div>
 
                 {/* User Profile */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3 lg:gap-4">
                     <div className="h-px bg-[#B7BCC9]"></div>
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-[13px]">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8E12D5]">
-                                <span className="font-['Source_Sans_3'] text-lg font-semibold leading-7 text-white">
+                        <div className="flex items-center gap-2 lg:gap-[13px]">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#8E12D5] lg:h-8 lg:w-8">
+                                <span className="font-['Source_Sans_3'] text-base font-semibold leading-6 text-white lg:text-lg lg:leading-7">
                                     A
                                 </span>
                             </div>
-                            <span className="font-['Roboto'] text-lg font-bold leading-7 text-[#3D2D4C]">
+                            <span className="font-['Roboto'] text-base font-bold leading-6 text-[#3D2D4C] lg:text-lg lg:leading-7">
                                 Alexandra
                             </span>
                         </div>
@@ -73,13 +68,13 @@ export default function Chat() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex flex-1 flex-col">
+            <main className="flex flex-1 flex-col overflow-hidden">
                 {/* Header */}
-                <header className="flex justify-end gap-2 px-[70px] py-[70px]">
-                    <button className="flex h-6 w-6 items-center justify-center">
+                <header className="flex justify-end gap-2 px-8 py-8 lg:px-12 lg:py-12 xl:px-[70px] xl:py-[70px]">
+                    <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
                         <ColorModeIcon />
                     </button>
-                    <button className="flex h-6 w-6 items-center justify-center">
+                    <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
                         <SignOutIcon />
                     </button>
                     <div className="flex h-6 w-6 items-center justify-center">
@@ -92,42 +87,42 @@ export default function Chat() {
                 </header>
 
                 {/* Content Area */}
-                <div className="flex flex-1 items-center justify-center px-[292px]">
-                    <div className="relative h-[850px] w-full max-w-[1174px] rounded bg-white shadow-[0_0_11px_0_rgba(128,139,157,0.15)]">
+                <div className="flex flex-1 items-center justify-center overflow-auto px-6 pb-8 lg:px-12 xl:px-[292px]">
+                    <div className="relative h-auto w-full max-w-[1174px] rounded bg-white shadow-[0_0_11px_0_rgba(128,139,157,0.15)] lg:h-[700px] xl:h-[850px]">
                         {/* Centered Content */}
-                        <div className="absolute left-1/2 top-1/2 flex w-[956px] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-6">
+                        <div className="flex flex-col items-center gap-4 p-8 lg:absolute lg:left-1/2 lg:top-1/2 lg:w-[90%] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-5 xl:w-[956px] xl:gap-6">
                             {/* Title */}
-                            <h2 className="font-['IBM_Plex_Mono'] text-center text-5xl font-bold leading-[70px] text-[#3D2D4C]">
+                            <h2 className="font-['IBM_Plex_Mono'] text-center text-3xl font-bold leading-tight text-[#3D2D4C] lg:text-4xl lg:leading-[50px] xl:text-5xl xl:leading-[70px]">
                                 What can I help with?
                             </h2>
 
                             {/* Input Box */}
-                            <div className="flex w-full items-center justify-between gap-2.5 rounded-[10px] border border-[#3D2D4C] bg-white px-[27px] py-[21px]">
+                            <div className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-[#3D2D4C] bg-white px-4 py-3 lg:gap-2.5 lg:px-5 lg:py-4 xl:px-[27px] xl:py-[21px]">
                                 <input
                                     type="text"
                                     placeholder="Message Soft GPT"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    className="flex-1 font-['Roboto'] text-lg leading-7 text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C]"
+                                    className="flex-1 font-['Roboto'] text-base leading-6 text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C] lg:text-lg lg:leading-7"
                                 />
-                                <div className="flex items-center gap-2.5">
-                                    <button className="flex h-6 w-6 items-center justify-center">
+                                <div className="flex items-center gap-2 lg:gap-2.5">
+                                    <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
                                         <PaperClipIcon />
                                     </button>
-                                    <button className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#8E12D5]">
+                                    <button className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#8E12D5] transition-colors hover:bg-[#7a0fb8] lg:h-10 lg:w-10">
                                         <SendIcon />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Quick Actions */}
-                            <div className="flex flex-wrap items-center justify-center gap-4">
+                            <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3 xl:gap-4">
                                 {quickActions.map((action, index) => (
                                     <button
                                         key={index}
-                                        className="flex h-10 items-center justify-center gap-2.5 rounded-[30px] border border-[#878E9B] px-2.5"
+                                        className="flex h-9 items-center justify-center gap-2 rounded-[30px] border border-[#878E9B] px-2 transition-colors hover:border-[#8E12D5] hover:text-[#8E12D5] lg:h-10 lg:gap-2.5 lg:px-2.5"
                                     >
-                                        <span className="font-['Roboto'] text-center text-base leading-[25px] text-[#878E9B]">
+                                        <span className="font-['Roboto'] text-center text-sm leading-5 text-[#878E9B] lg:text-base lg:leading-[25px]">
                                             {action}
                                         </span>
                                     </button>
@@ -197,99 +192,6 @@ function CommentIcon({ active }: { active: boolean }) {
     );
 }
 
-function DocumentIcon({ active }: { active: boolean }) {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="5" y="4" width="14" height="17" rx="2" stroke={active ? "white" : "#3D2D4C"} strokeWidth="2" />
-            <path d="M9 9H15" stroke={active ? "white" : "#3D2D4C"} strokeWidth="2" strokeLinecap="round" />
-            <path d="M9 13H15" stroke={active ? "white" : "#3D2D4C"} strokeWidth="2" strokeLinecap="round" />
-            <path d="M9 17H13" stroke={active ? "white" : "#3D2D4C"} strokeWidth="2" strokeLinecap="round" />
-        </svg>
-    );
-}
-
-function ImageIcon({ active }: { active: boolean }) {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-                d="M2.5 11.5V6.5C2.5 4.29086 4.29086 2.5 6.5 2.5H17.5C19.7091 2.5 21.5 4.29086 21.5 6.5V17.5C21.5 19.7091 19.7091 21.5 17.5 21.5H6.5C4.29086 21.5 2.5 19.7091 2.5 17.5V15.5"
-                stroke={active ? "white" : "#3D2D4C"}
-                strokeWidth="2"
-                strokeLinecap="round"
-            />
-            <path
-                d="M4 13L5.8055 11.1945C6.68783 10.3122 8.1538 10.4443 8.86408 11.4703L10.7664 14.218C11.4311 15.1781 12.7735 15.3669 13.6773 14.6275L16.0991 12.646C16.8944 11.9954 18.0533 12.0532 18.7798 12.7797L21.5 15.5"
-                stroke={active ? "white" : "#3D2D4C"}
-                strokeWidth="2"
-                strokeLinecap="round"
-            />
-            <circle cx="16.5" cy="7.5" r="1.5" fill={active ? "white" : "#3D2D4C"} />
-        </svg>
-    );
-}
-
-function CodeIcon({ active }: { active: boolean }) {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 7L20 12L16 17" stroke={active ? "white" : "#3D2D4C"} strokeWidth="2" />
-            <path d="M8 7L4 12L8 17" stroke={active ? "white" : "#3D2D4C"} strokeWidth="2" />
-        </svg>
-    );
-}
-
-function MicIcon({ active }: { active: boolean }) {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect
-                x="9"
-                y="3"
-                width="6"
-                height="11"
-                rx="3"
-                stroke={active ? "white" : "#3D2D4C"}
-                strokeWidth="2"
-                strokeLinejoin="round"
-            />
-            <path
-                d="M5 11C5 12.8565 5.7375 14.637 7.05025 15.9497C8.36301 17.2625 10.1435 18 12 18C13.8565 18 15.637 17.2625 16.9497 15.9497C18.2625 14.637 19 12.8565 19 11"
-                stroke={active ? "white" : "#3D2D4C"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-            <path
-                d="M12 21V19"
-                stroke={active ? "white" : "#3D2D4C"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    );
-}
-
-function DesktopIcon({ active }: { active: boolean }) {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <mask id="mask0_2_38" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-                <rect width="24" height="24" fill="#D9D9D9" />
-            </mask>
-            <g mask="url(#mask0_2_38)">
-                <path
-                    d="M7 5H17C17.9711 5 18.599 5.00227 19.0615 5.06445C19.4951 5.12277 19.6309 5.21686 19.707 5.29297C19.7831 5.36908 19.8772 5.50493 19.9355 5.93848C19.9977 6.40098 20 7.02892 20 8V16H4V8C4 7.02892 4.00227 6.40098 4.06445 5.93848C4.12277 5.50493 4.21686 5.36908 4.29297 5.29297C4.36908 5.21686 4.50493 5.12277 4.93848 5.06445C5.40098 5.00227 6.02892 5 7 5Z"
-                    stroke={active ? "white" : "#3D2D4C"}
-                    strokeWidth="2"
-                />
-                <path
-                    d="M20.333 16C21.2535 16 22 16.7465 22 17.667C21.9998 18.9554 20.9554 19.9998 19.667 20H4.33301C3.0446 19.9998 2.00018 18.9554 2 17.667C2 16.7465 2.74652 16 3.66699 16H20.333Z"
-                    stroke={active ? "white" : "#3D2D4C"}
-                    strokeWidth="2"
-                />
-            </g>
-        </svg>
-    );
-}
-
 function ColorModeIcon() {
     return (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -341,7 +243,7 @@ function PaperClipIcon() {
 
 function SendIcon() {
     return (
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M14 17L20 11L26 17" stroke="#F0F7FB" strokeWidth="2" strokeLinecap="round" />
             <path d="M20 11.5V29" stroke="#F0F7FB" strokeWidth="2" strokeLinecap="round" />
         </svg>
