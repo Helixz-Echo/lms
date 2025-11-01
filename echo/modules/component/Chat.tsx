@@ -1,10 +1,44 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Chat() {
+    const router = useRouter();
     const [message, setMessage] = useState("");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const handleSignOut = async () => {
+        try {
+            await fetch("/api/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+            router.push("/auth/login");
+            router.refresh();
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
+    };
+
+    const handleNavigation = (label: string) => {
+        setIsMobileMenuOpen(false);
+        
+        switch (label) {
+            case "Dashboard":
+                router.push("/dashboard");
+                break;
+            case "Start new chat":
+                // Clear the message and stay on current page
+                setMessage("");
+                break;
+            case "AI chat":
+                router.push("/chat");
+                break;
+            default:
+                break;
+        }
+    };
 
     const quickActions = ["Article", "Weather", "Sport", "Press", "Food", "Plants", "Suggest something"];
 
@@ -65,7 +99,7 @@ export default function Chat() {
                                 className={`flex items-center gap-3 rounded px-3 py-3 text-left transition-colors hover:bg-opacity-80 lg:gap-2.5 lg:px-2.5 lg:py-2.5 ${
                                     item.active ? "bg-[#8E12D5]" : "hover:bg-gray-100"
                                 }`}
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                onClick={() => handleNavigation(item.label)}
                             >
                                 <item.icon active={item.active} />
                                 <span
@@ -106,7 +140,11 @@ export default function Chat() {
                     <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
                         <ColorModeIcon />
                     </button>
-                    <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
+                    <button 
+                        onClick={handleSignOut}
+                        className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110"
+                        title="Sign Out"
+                    >
                         <SignOutIcon />
                     </button>
                     <div className="flex h-6 w-6 items-center justify-center">

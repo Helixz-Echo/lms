@@ -52,16 +52,20 @@ export default function Login({ redirectTo = "/" }: Props) {
     }
 
     return (
-        <div className="mx-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="mx-auto w-full max-w-md rounded-2xl border border-[#B7BCC9] bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8">
             <div className="mb-6 text-center">
-                <h1 className="text-2xl font-semibold text-gray-900">Welcome back</h1>
-                <p className="mt-1 text-sm text-gray-600">Sign in to continue</p>
+                <h1 className="font-['IBM_Plex_Mono'] text-2xl font-bold text-[#3D2D4C] sm:text-3xl">
+                    Welcome to Soft GPT
+                </h1>
+                <p className="mt-2 font-['Roboto'] text-sm text-[#3D2D4C] opacity-70">
+                    Sign in to continue to your AI assistant
+                </p>
             </div>
 
             <form onSubmit={onSubmit} className="space-y-5">
                 <div>
-                    <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
-                        Email
+                    <label htmlFor="email" className="mb-2 block font-['Roboto'] text-sm font-medium text-[#3D2D4C]">
+                        Email Address
                     </label>
                     <input
                         id="email"
@@ -69,14 +73,14 @@ export default function Login({ redirectTo = "/" }: Props) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full rounded-xl border border-gray-300 px-3 py-2 text-gray-900 outline-none focus:border-gray-900"
+                        className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#8E12D5] focus:ring-2 focus:ring-[#8E12D5] focus:ring-opacity-20"
                         autoComplete="email"
                         required
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+                    <label htmlFor="password" className="mb-2 block font-['Roboto'] text-sm font-medium text-[#3D2D4C]">
                         Password
                     </label>
                     <div className="relative">
@@ -86,7 +90,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 px-3 py-2 pr-16 text-gray-900 outline-none focus:border-gray-900"
+                            className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 pr-16 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#8E12D5] focus:ring-2 focus:ring-[#8E12D5] focus:ring-opacity-20"
                             autoComplete="current-password"
                             required
                             minLength={6}
@@ -94,7 +98,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                         <button
                             type="button"
                             onClick={() => setShowPw((s) => !s)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 font-['Roboto'] text-xs text-[#3D2D4C] opacity-70 transition-colors hover:bg-gray-100 hover:opacity-100"
                             aria-label={showPw ? "Hide password" : "Show password"}
                         >
                             {showPw ? "Hide" : "Show"}
@@ -104,7 +108,7 @@ export default function Login({ redirectTo = "/" }: Props) {
 
                 {error && (
                     <div
-                        className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                        className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-['Roboto'] text-sm text-red-700"
                         role="alert"
                         aria-live="polite"
                     >
@@ -115,12 +119,16 @@ export default function Login({ redirectTo = "/" }: Props) {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex w-full items-center justify-center rounded-xl bg-black px-4 py-2.5 font-medium text-white transition disabled:opacity-60"
+                    className="flex w-full items-center justify-center rounded-xl bg-[#8E12D5] px-4 py-3 font-['Roboto'] font-semibold text-white transition-colors hover:bg-[#7a0fb8] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? "Signing in…" : "Sign in"}
                 </button>
 
-                <div className="text-center text-xs text-gray-500">
+                <div className="text-center font-['Roboto'] text-xs text-[#3D2D4C] opacity-60">
+                    Demo: admin@example.com / password123
+                </div>
+
+                <div className="text-center font-['Roboto'] text-xs text-[#3D2D4C] opacity-50">
                     By continuing, you agree to our Terms & Privacy.
                 </div>
             </form>
