@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 export default function Chat() {
     const [message, setMessage] = useState("");
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const quickActions = ["Article", "Weather", "Sport", "Press", "Food", "Plants", "Suggest something"];
 
@@ -15,12 +16,42 @@ export default function Chat() {
 
     return (
         <div className="flex h-screen bg-[#F0F7FB]">
+            {/* Mobile Menu Button */}
+            <button
+                className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-[#8E12D5] text-white shadow-lg md:hidden"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            </button>
+
+            {/* Mobile Overlay */}
+            {isMobileMenuOpen && (
+                <div 
+                    className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="flex w-[200px] flex-col justify-between border-r border-[#B7BCC9] px-4 py-6 lg:w-[240px] lg:px-6 lg:py-8 xl:w-[267px] xl:px-7 xl:py-10">
-                <div className="flex flex-col gap-3 lg:gap-4 xl:gap-[18px]">
+            <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col justify-between border-r border-[#B7BCC9] bg-[#F0F7FB] px-4 py-6 transition-transform duration-300 ease-in-out md:static md:z-auto md:w-60 md:translate-x-0 lg:w-64 lg:px-6 lg:py-8 xl:w-[267px] xl:px-7 xl:py-10 ${
+                isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            } md:translate-x-0`}>
+                {/* Close button for mobile */}
+                <button
+                    className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-[#3D2D4C] hover:bg-gray-200 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+
+                <div className="flex flex-col gap-4 lg:gap-[18px]">
                     {/* Logo */}
                     <div className="flex flex-col gap-2">
-                        <h1 className="font-['IBM_Plex_Mono'] text-[28px] font-bold leading-[42px] text-[#3D2D4C] lg:text-[32px] lg:leading-[48px] xl:text-[40px] xl:leading-[60px]">
+                        <h1 className="font-['IBM_Plex_Mono'] text-2xl font-bold leading-8 text-[#3D2D4C] sm:text-3xl sm:leading-10 lg:text-4xl lg:leading-12 xl:text-[40px] xl:leading-[60px]">
                             Soft GPT
                         </h1>
                         <div className="h-px bg-[#B7BCC9]"></div>
@@ -31,9 +62,10 @@ export default function Chat() {
                         {navItems.map((item, index) => (
                             <button
                                 key={index}
-                                className={`flex items-center gap-2 rounded px-2 py-2 transition-colors hover:bg-opacity-80 lg:gap-2.5 lg:px-2.5 ${
+                                className={`flex items-center gap-3 rounded px-3 py-3 text-left transition-colors hover:bg-opacity-80 lg:gap-2.5 lg:px-2.5 lg:py-2.5 ${
                                     item.active ? "bg-[#8E12D5]" : "hover:bg-gray-100"
                                 }`}
+                                onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <item.icon active={item.active} />
                                 <span
@@ -52,8 +84,8 @@ export default function Chat() {
                 <div className="flex flex-col gap-3 lg:gap-4">
                     <div className="h-px bg-[#B7BCC9]"></div>
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 lg:gap-[13px]">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#8E12D5] lg:h-8 lg:w-8">
+                        <div className="flex items-center gap-3 lg:gap-[13px]">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8E12D5]">
                                 <span className="font-['Source_Sans_3'] text-base font-semibold leading-6 text-white lg:text-lg lg:leading-7">
                                     A
                                 </span>
@@ -68,9 +100,9 @@ export default function Chat() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex flex-1 flex-col overflow-hidden">
+            <main className="flex flex-1 flex-col overflow-hidden md:ml-0">
                 {/* Header */}
-                <header className="flex justify-end gap-2 px-8 py-8 lg:px-12 lg:py-12 xl:px-[70px] xl:py-[70px]">
+                <header className="flex justify-end gap-2 px-4 py-4 sm:px-6 sm:py-6 lg:px-12 lg:py-12 xl:px-[70px] xl:py-[70px]">
                     <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
                         <ColorModeIcon />
                     </button>
@@ -79,7 +111,7 @@ export default function Chat() {
                     </button>
                     <div className="flex h-6 w-6 items-center justify-center">
                         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#3D2D4C]">
-                            <span className="font-['Roboto'] text-xs font-bold leading-[14px] text-[#F0F7FB]">
+                            <span className="font-['Roboto'] text-xs font-bold leading-3.5 text-[#F0F7FB]">
                                 AC
                             </span>
                         </div>
@@ -87,42 +119,42 @@ export default function Chat() {
                 </header>
 
                 {/* Content Area */}
-                <div className="flex flex-1 items-center justify-center overflow-auto px-6 pb-8 lg:px-12 xl:px-[292px]">
-                    <div className="relative h-auto w-full max-w-[1174px] rounded bg-white shadow-[0_0_11px_0_rgba(128,139,157,0.15)] lg:h-[700px] xl:h-[850px]">
+                <div className="flex flex-1 items-center justify-center overflow-auto px-4 pb-6 sm:px-6 sm:pb-8 lg:px-12 xl:px-[292px]">
+                    <div className="relative w-full max-w-6xl rounded bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8 lg:p-12 xl:h-[850px] xl:max-w-[1174px]">
                         {/* Centered Content */}
-                        <div className="flex flex-col items-center gap-4 p-8 lg:absolute lg:left-1/2 lg:top-1/2 lg:w-[90%] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-5 xl:w-[956px] xl:gap-6">
+                        <div className="flex h-full flex-col items-center justify-center gap-6 lg:gap-8 xl:absolute xl:left-1/2 xl:top-1/2 xl:w-[956px] xl:-translate-x-1/2 xl:-translate-y-1/2">
                             {/* Title */}
-                            <h2 className="font-['IBM_Plex_Mono'] text-center text-3xl font-bold leading-tight text-[#3D2D4C] lg:text-4xl lg:leading-[50px] xl:text-5xl xl:leading-[70px]">
+                            <h2 className="font-['IBM_Plex_Mono'] text-center text-2xl font-bold leading-tight text-[#3D2D4C] sm:text-3xl sm:leading-9 lg:text-4xl lg:leading-[50px] xl:text-5xl xl:leading-[70px]">
                                 What can I help with?
                             </h2>
 
                             {/* Input Box */}
-                            <div className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-[#3D2D4C] bg-white px-4 py-3 lg:gap-2.5 lg:px-5 lg:py-4 xl:px-[27px] xl:py-[21px]">
+                            <div className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-[#3D2D4C] bg-white px-4 py-3 sm:px-5 sm:py-4 lg:gap-2.5 xl:px-[27px] xl:py-[21px]">
                                 <input
                                     type="text"
                                     placeholder="Message Soft GPT"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    className="flex-1 font-['Roboto'] text-base leading-6 text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C] lg:text-lg lg:leading-7"
+                                    className="flex-1 font-['Roboto'] text-sm leading-5 text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C] sm:text-base sm:leading-6 lg:text-lg lg:leading-7"
                                 />
                                 <div className="flex items-center gap-2 lg:gap-2.5">
                                     <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
                                         <PaperClipIcon />
                                     </button>
-                                    <button className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#8E12D5] transition-colors hover:bg-[#7a0fb8] lg:h-10 lg:w-10">
+                                    <button className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[#8E12D5] transition-colors hover:bg-[#7a0fb8] sm:h-9 sm:w-9 lg:h-10 lg:w-10">
                                         <SendIcon />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Quick Actions */}
-                            <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3 xl:gap-4">
+                            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 xl:gap-4">
                                 {quickActions.map((action, index) => (
                                     <button
                                         key={index}
-                                        className="flex h-9 items-center justify-center gap-2 rounded-[30px] border border-[#878E9B] px-2 transition-colors hover:border-[#8E12D5] hover:text-[#8E12D5] lg:h-10 lg:gap-2.5 lg:px-2.5"
+                                        className="flex h-8 items-center justify-center gap-2 rounded-[30px] border border-[#878E9B] px-3 text-xs transition-colors hover:border-[#8E12D5] hover:text-[#8E12D5] sm:h-9 sm:px-4 sm:text-sm lg:h-10 lg:gap-2.5 lg:px-2.5 lg:text-base"
                                     >
-                                        <span className="font-['Roboto'] text-center text-sm leading-5 text-[#878E9B] lg:text-base lg:leading-[25px]">
+                                        <span className="font-['Roboto'] text-center leading-5 text-[#878E9B] lg:leading-[25px]">
                                             {action}
                                         </span>
                                     </button>
