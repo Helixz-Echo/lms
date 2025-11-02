@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Mock authentication - replace with real authentication logic
+        // Simple hardcoded authentication for testing - replace with real authentication logic
         const validEmail = "admin@example.com";
         const validPassword = "password123";
 

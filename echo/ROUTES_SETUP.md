@@ -3,14 +3,17 @@
 ## Current Routes Setup
 
 ### 🏠 **Main Routes**
+
 - **`/`** → Home page (displays Chat component)
 - **`/chat`** → Dedicated chat page (displays Chat component)
 - **`/dashboard`** → Dashboard (displays Chat component after login)
 
-### 🔐 **Authentication Routes** 
+### 🔐 **Authentication Routes**
+
 - **`/auth/login`** → Login page (displays Login component)
 
 ### 🛠️ **API Routes**
+
 - **`/api/login`** → POST endpoint for user authentication
 
 ---
@@ -22,19 +25,19 @@ app/
 ├── layout.tsx                    # Root layout
 ├── page.tsx                      # Home page (/)
 ├── globals.css                   # Global styles
-├── 
+├──
 ├── (open)/                       # Route group for public pages
 │   ├── layout.tsx               # Auth layout with gradient background
 │   └── auth/
 │       └── login/
 │           └── page.tsx         # Login page (/auth/login)
-├── 
+├──
 ├── chat/
 │   └── page.tsx                 # Chat page (/chat)
-├── 
+├──
 ├── dashboard/
 │   └── page.tsx                 # Dashboard page (/dashboard)
-├── 
+├──
 └── api/
     └── login/
         └── route.ts             # Login API endpoint
@@ -45,12 +48,14 @@ app/
 ## 🚀 **How to Test Routes**
 
 ### 1. **Login Page**
+
 ```
 URL: http://localhost:3000/auth/login
 Credentials: admin@example.com / password123
 ```
 
 ### 2. **Main Chat Page**
+
 ```
 URL: http://localhost:3000/
 or
@@ -58,6 +63,7 @@ URL: http://localhost:3000/chat
 ```
 
 ### 3. **Dashboard (After Login)**
+
 ```
 URL: http://localhost:3000/dashboard
 ```
@@ -78,6 +84,7 @@ URL: http://localhost:3000/dashboard
 ## 🎨 **Design Consistency**
 
 ### Login Page Features:
+
 - ✅ **Matches Chat UI theme** (colors, fonts, styling)
 - ✅ **Responsive design** (mobile-friendly)
 - ✅ **Form validation** (email format, required fields)
@@ -86,6 +93,7 @@ URL: http://localhost:3000/dashboard
 - ✅ **Demo credentials** displayed for easy testing
 
 ### Route Group Benefits:
+
 - **(open)** group allows public access without authentication
 - **Custom layout** for auth pages with gradient background
 - **Organized structure** separating public and private routes
@@ -104,6 +112,7 @@ URL: http://localhost:3000/dashboard
 ## 📱 **Mobile Responsive**
 
 All routes are fully responsive:
+
 - **Mobile-first design**
 - **Touch-friendly buttons**
 - **Proper spacing and typography**

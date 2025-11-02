@@ -49,10 +49,10 @@ export default function Chat() {
     ];
 
     return (
-        <div className="flex h-screen bg-[#F0F7FB]">
+        <div className="flex h-screen bg-gradient-to-br from-[#7B93DB] via-[#8DA8E3] to-[#9DB3E8]">
             {/* Mobile Menu Button */}
             <button
-                className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-[#8E12D5] text-white shadow-lg md:hidden"
+                className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8] text-white shadow-lg md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -69,7 +69,7 @@ export default function Chat() {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col justify-between border-r border-[#B7BCC9] bg-[#F0F7FB] px-4 py-6 transition-transform duration-300 ease-in-out md:static md:z-auto md:w-60 md:translate-x-0 lg:w-64 lg:px-6 lg:py-8 xl:w-[267px] xl:px-7 xl:py-10 ${
+            <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col justify-between border-r border-[#B7BCC9] bg-gradient-to-b from-[#7B93DB]/20 to-[#9DB3E8]/20 backdrop-blur-sm px-4 py-6 transition-transform duration-300 ease-in-out md:static md:z-auto md:w-60 md:translate-x-0 lg:w-64 lg:px-6 lg:py-8 xl:w-[267px] xl:px-7 xl:py-10 ${
                 isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
             } md:translate-x-0`}>
                 {/* Close button for mobile */}
@@ -97,7 +97,7 @@ export default function Chat() {
                             <button
                                 key={index}
                                 className={`flex items-center gap-3 rounded px-3 py-3 text-left transition-colors hover:bg-opacity-80 lg:gap-2.5 lg:px-2.5 lg:py-2.5 ${
-                                    item.active ? "bg-[#8E12D5]" : "hover:bg-gray-100"
+                                    item.active ? "bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8]" : "hover:bg-gradient-to-r hover:from-[#7B93DB]/30 hover:to-[#9DB3E8]/30"
                                 }`}
                                 onClick={() => handleNavigation(item.label)}
                             >
@@ -119,7 +119,7 @@ export default function Chat() {
                     <div className="h-px bg-[#B7BCC9]"></div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 lg:gap-[13px]">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8E12D5]">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8]">
                                 <span className="font-['Source_Sans_3'] text-base font-semibold leading-6 text-white lg:text-lg lg:leading-7">
                                     A
                                 </span>
@@ -148,8 +148,8 @@ export default function Chat() {
                         <SignOutIcon />
                     </button>
                     <div className="flex h-6 w-6 items-center justify-center">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#3D2D4C]">
-                            <span className="font-['Roboto'] text-xs font-bold leading-3.5 text-[#F0F7FB]">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8]">
+                            <span className="font-['Roboto'] text-xs font-bold leading-3.5 text-white">
                                 AC
                             </span>
                         </div>
@@ -158,7 +158,7 @@ export default function Chat() {
 
                 {/* Content Area */}
                 <div className="flex flex-1 items-center justify-center overflow-auto px-4 pb-6 sm:px-6 sm:pb-8 lg:px-12 xl:px-[292px]">
-                    <div className="relative w-full max-w-6xl rounded bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8 lg:p-12 xl:h-[850px] xl:max-w-[1174px]">
+                    <div className="relative w-full max-w-6xl rounded bg-white/90 backdrop-blur-sm border border-[#9DB3E8]/30 shadow-[0_8px_32px_0_rgba(123,147,219,0.2)] p-6 sm:p-8 lg:p-12 xl:h-[850px] xl:max-w-[1174px]">
                         {/* Centered Content */}
                         <div className="flex h-full flex-col items-center justify-center gap-6 lg:gap-8 xl:absolute xl:left-1/2 xl:top-1/2 xl:w-[956px] xl:-translate-x-1/2 xl:-translate-y-1/2">
                             {/* Title */}
@@ -167,19 +167,19 @@ export default function Chat() {
                             </h2>
 
                             {/* Input Box */}
-                            <div className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-[#3D2D4C] bg-white px-4 py-3 sm:px-5 sm:py-4 lg:gap-2.5 xl:px-[27px] xl:py-[21px]">
+                            <div className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-[#7B93DB]/50 bg-white/80 backdrop-blur-sm px-4 py-3 shadow-lg sm:px-5 sm:py-4 lg:gap-2.5 xl:px-[27px] xl:py-[21px]">
                                 <input
                                     type="text"
                                     placeholder="Message Soft GPT"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    className="flex-1 font-['Roboto'] text-sm leading-5 text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C] sm:text-base sm:leading-6 lg:text-lg lg:leading-7"
+                                    className="flex-1 font-['Roboto'] text-sm leading-5 text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C]/70 bg-transparent sm:text-base sm:leading-6 lg:text-lg lg:leading-7"
                                 />
                                 <div className="flex items-center gap-2 lg:gap-2.5">
                                     <button className="flex h-6 w-6 items-center justify-center transition-transform hover:scale-110">
                                         <PaperClipIcon />
                                     </button>
-                                    <button className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[#8E12D5] transition-colors hover:bg-[#7a0fb8] sm:h-9 sm:w-9 lg:h-10 lg:w-10">
+                                    <button className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8] transition-all hover:shadow-lg hover:scale-105 sm:h-9 sm:w-9 lg:h-10 lg:w-10">
                                         <SendIcon />
                                     </button>
                                 </div>
@@ -190,9 +190,9 @@ export default function Chat() {
                                 {quickActions.map((action, index) => (
                                     <button
                                         key={index}
-                                        className="flex h-8 items-center justify-center gap-2 rounded-[30px] border border-[#878E9B] px-3 text-xs transition-colors hover:border-[#8E12D5] hover:text-[#8E12D5] sm:h-9 sm:px-4 sm:text-sm lg:h-10 lg:gap-2.5 lg:px-2.5 lg:text-base"
+                                        className="flex h-8 items-center justify-center gap-2 rounded-[30px] border border-[#7B93DB]/40 bg-white/60 backdrop-blur-sm px-3 text-xs transition-all hover:border-[#7B93DB] hover:bg-gradient-to-r hover:from-[#7B93DB]/10 hover:to-[#9DB3E8]/10 hover:shadow-md sm:h-9 sm:px-4 sm:text-sm lg:h-10 lg:gap-2.5 lg:px-2.5 lg:text-base"
                                     >
-                                        <span className="font-['Roboto'] text-center leading-5 text-[#878E9B] lg:leading-[25px]">
+                                        <span className="font-['Roboto'] text-center leading-5 text-[#7B93DB] lg:leading-[25px]">
                                             {action}
                                         </span>
                                     </button>
