@@ -55,7 +55,7 @@ export default function Chat() {
                     </div>
                 )}
                 {messages.map((msg, i) => (
-                    <Message key={i} role={msg.role} content={typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content, null, 2)} />
+                    <Message key={i} role={msg.role} content={msg.content} />
                 ))}
                 {isLoading && <Message role="assistant" content="Thinking..." />}
             </div>
