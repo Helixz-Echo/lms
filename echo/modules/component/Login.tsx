@@ -73,7 +73,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#8E12D5] focus:ring-2 focus:ring-[#8E12D5] focus:ring-opacity-20"
+                        className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#7B93DB] focus:ring-2 focus:ring-[#7B93DB] focus:ring-opacity-20"
                         autoComplete="email"
                         required
                     />
@@ -90,7 +90,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 pr-16 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#8E12D5] focus:ring-2 focus:ring-[#8E12D5] focus:ring-opacity-20"
+                            className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 pr-16 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#7B93DB] focus:ring-2 focus:ring-[#7B93DB] focus:ring-opacity-20"
                             autoComplete="current-password"
                             required
                             minLength={6}
@@ -119,7 +119,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex w-full items-center justify-center rounded-xl bg-[#8E12D5] px-4 py-3 font-['Roboto'] font-semibold text-white transition-colors hover:bg-[#7a0fb8] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-[#7B93DB] to-[#9DB3E6] px-4 py-3 font-['Roboto'] font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? "Signing in…" : "Sign in"}
                 </button>

@@ -109,10 +109,10 @@ export default function Chat() {
     ];
 
     return (
-        <div className="flex h-screen bg-gradient-to-br from-[#7B93DB] via-[#8DA8E3] to-[#9DB3E8]">
+        <div className="flex h-screen bg-linear-to-br from-[#7B93DB] via-[#8DA8E3] to-[#9DB3E8]">
             {/* Mobile Menu Button */}
             <button
-                className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8] text-white shadow-lg md:hidden"
+                className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-r from-[#7B93DB] to-[#9DB3E8] text-white shadow-lg md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label="Toggle menu"
             >
@@ -136,7 +136,7 @@ export default function Chat() {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between border-r border-white/20 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-md px-6 py-8 shadow-2xl transition-transform duration-300 ease-in-out md:static md:z-auto md:w-64 md:translate-x-0 lg:w-72 xl:w-[280px] ${
+            <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between border-r border-white/20 bg-linear-to-b from-white/10 to-white/5 backdrop-blur-md px-6 py-8 shadow-2xl transition-transform duration-300 ease-in-out md:static md:z-auto md:w-64 md:translate-x-0 lg:w-72 xl:w-[280px] ${
                 isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
             }`}>
                 <div className="flex flex-col gap-6">
@@ -214,7 +214,7 @@ export default function Chat() {
                     >
                         <SignOutIcon />
                     </button>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8] shadow-lg ring-2 ring-white/30 transition-transform hover:scale-110">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-r from-[#7B93DB] to-[#9DB3E8] shadow-lg ring-2 ring-white/30 transition-transform hover:scale-110">
                         <span className="font-['Roboto'] text-sm font-bold text-white">
                             KI
                         </span>
@@ -239,7 +239,7 @@ export default function Chat() {
                                             <button
                                                 key={index}
                                                 onClick={() => handleQuickAction(action)}
-                                                className="group flex items-center justify-center gap-2 rounded-full border-2 border-[#7B93DB]/30 bg-white/80 px-3 py-2 backdrop-blur-sm transition-all hover:scale-105 hover:border-[#7B93DB] hover:bg-gradient-to-r hover:from-[#7B93DB]/10 hover:to-[#9DB3E8]/10 hover:shadow-md active:scale-95 md:px-4 md:py-2.5 lg:px-5 lg:py-3"
+                                                className="group flex items-center justify-center gap-2 rounded-full border-2 border-[#7B93DB]/30 bg-white/80 px-3 py-2 backdrop-blur-sm transition-all hover:scale-105 hover:border-[#7B93DB] hover:bg-linear-to-r hover:from-[#7B93DB]/10 hover:to-[#9DB3E8]/10 hover:shadow-md active:scale-95 md:px-4 md:py-2.5 lg:px-5 lg:py-3"
                                             >
                                                 <span className="font-['Roboto'] text-xs font-medium text-[#7B93DB] transition-colors group-hover:text-[#7B93DB] md:text-sm lg:text-base">
                                                     {action}
@@ -269,10 +269,10 @@ export default function Chat() {
                                             >
                                                 {/* Avatar */}
                                                 <div
-                                                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
+                                                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
                                                         msg.sender === "user"
-                                                            ? "bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8]"
-                                                            : "bg-gradient-to-r from-purple-500 to-pink-500"
+                                                            ? "bg-linear-to-r from-[#7B93DB] to-[#9DB3E8]"
+                                                            : "bg-linear-to-r from-purple-500 to-pink-500"
                                                     } shadow-lg`}
                                                 >
                                                     <span className="text-xs font-bold text-white">
@@ -284,7 +284,7 @@ export default function Chat() {
                                                 <div
                                                     className={`rounded-2xl px-4 py-3 shadow-md ${
                                                         msg.sender === "user"
-                                                            ? "bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8] text-white"
+                                                            ? "bg-linear-to-r from-[#7B93DB] to-[#9DB3E8] text-white"
                                                             : "bg-gray-100 text-gray-800"
                                                     }`}
                                                 >
@@ -312,7 +312,7 @@ export default function Chat() {
                                     {isLoading && (
                                         <div className="flex justify-start">
                                             <div className="flex max-w-[85%] gap-3">
-                                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-purple-500 to-pink-500 shadow-lg">
                                                     <span className="text-xs font-bold text-white">AI</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 rounded-2xl bg-gray-100 px-4 py-3 shadow-md">
@@ -356,7 +356,7 @@ export default function Chat() {
                                         <button 
                                             onClick={handleSendMessage}
                                             disabled={!message.trim() || isLoading}
-                                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-[#7B93DB] to-[#9DB3E8] shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 md:h-12 md:w-12"
+                                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-[#7B93DB] to-[#9DB3E8] shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 md:h-12 md:w-12"
                                             aria-label="Send message"
                                         >
                                             <SendIcon />
