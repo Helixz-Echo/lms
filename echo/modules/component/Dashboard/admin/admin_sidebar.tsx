@@ -2,8 +2,9 @@
 
 import { LayoutGrid, BookOpen, HelpCircle, MessageSquare, Clock, User, Settings, LogOut } from "lucide-react"
 import { useEffect, useState } from "react"
+import {useRouter} from "next/navigation";
 
-export default function Sidebar() {
+export default function AdminSidebar() {
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true },
         { icon: BookOpen, label: "Course" },
@@ -20,6 +21,8 @@ export default function Sidebar() {
         const timeout = setTimeout(() => setLoaded(true), 50) // small delay avoids sync setState
         return () => clearTimeout(timeout)
     }, [])
+
+    const router = useRouter()
 
     return (
         <aside
@@ -64,7 +67,7 @@ export default function Sidebar() {
             <div className="p-4 border-t border-white/30">
                 <div className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-300 hover:bg-white/10 rounded-lg">
                     <LogOut className="w-5 h-5" />
-                    <span className="text-sm font-medium">Log Out</span>
+                    <span className="text-sm font-medium" ><button onClick={() => router.push("/")}>Log Out</button></span>
                 </div>
             </div>
         </aside>

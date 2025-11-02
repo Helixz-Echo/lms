@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import Sidebar from "@/modules/component/Dashboard/trainer/sidebar";
+import {redirect} from "next/navigation";
 
 export async function POST(request: NextRequest) {
     try {
@@ -12,35 +14,41 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Simple hardcoded authentication for testing - replace with real authentication logic
-        const validEmail = "admin@example.com";
-        const validPassword = "password123";
+        const trainerEmail = "trainer@example.com";
+        const trainerPassword = "trainer123";
 
-        if (email === validEmail && password === validPassword) {
-            // In a real app, you'd create a JWT or session here
-            const response = NextResponse.json(
-                { 
-                    message: "Login successful",
-                    user: { email: email, name: "Admin User" }
-                },
-                { status: 200 }
-            );
+        const adminEmail = "admin@example.com";
+        const adminPassword = "admin123";
 
-            // Set a simple auth cookie (in production, use proper session management)
-            response.cookies.set("auth", "true", {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                maxAge: 60 * 60 * 24, // 24 hours
-                path: "/"
-            });
+        let user = null;
 
-            return response;
-        } else {
+        if (email === adminEmail && password === adminPassword) {
+            user = { email, name: "Admin User", role: "admin" };
+        } else if (email === trainerEmail && password === trainerPassword) {
+            user = { email, name: "Trainer User", role: "trainer" };
+        }
+
+        if (!user) {
             return NextResponse.json(
                 { message: "Invalid email or password" },
                 { status: 401 }
             );
         }
+
+        const response = NextResponse.json(
+            { message: "Login successful", user },
+            { status: 200 }
+        );
+
+        // Set a simple auth cookie (in production, use proper session management)
+        response.cookies.set("auth", "true", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 24,
+            path: "/"
+        });
+
+        return response;
     } catch (error) {
         console.error("Login error:", error);
         return NextResponse.json(

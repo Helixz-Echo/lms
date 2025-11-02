@@ -30,6 +30,25 @@ export default function Login({ redirectTo = "/" }: Props) {
 
         try {
             setIsSubmitting(true);
+
+            const trainerEmail = "trainer@example.com";
+            const trainerPassword = "trainer123";
+
+            const adminEmail = "admin@example.com";
+            const adminPassword = "admin123";
+
+            // Local demo credential check — redirect immediately when matched
+            if (email === trainerEmail && password === trainerPassword) {
+                router.push("/dashboard/trainer");
+                router.refresh();
+                return;
+            } else if (email === adminEmail && password === adminPassword) {
+                router.push("/dashboard/admin");
+                router.refresh();
+                return;
+            }
+
+            // Fallback to server authentication
             const res = await fetch("/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -42,10 +61,13 @@ export default function Login({ redirectTo = "/" }: Props) {
                 throw new Error(data?.message || "Login failed. Check your credentials.");
             }
 
-            router.push(redirectTo);
+            const data = await res.json();
+            const destination = redirectTo || (data.role === "admin" ? "/dashboard/admin" : "/dashboard/trainer");
+            router.push(destination);
             router.refresh();
-        } catch (err: any) {
-            setError(err?.message ?? "Something went wrong.");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            setError(message || "Something went wrong.");
         } finally {
             setIsSubmitting(false);
         }
