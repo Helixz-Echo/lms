@@ -52,7 +52,7 @@ export default function TrainingGrid() {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
             {trainingSessions.map((session, index) => (
-                <Link key={session.id} href={`/training/${session.id}`} className="block">
+                <Link key={session.id} href="/chat" className="block">
                     <div
                         className={`cursor-pointer bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm transform transition-all duration-500 hover:shadow-lg hover:-translate-y-2 hover:scale-105
                         opacity-0 animate-fadeIn`}

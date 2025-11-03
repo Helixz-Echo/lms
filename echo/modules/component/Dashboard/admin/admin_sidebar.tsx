@@ -6,8 +6,8 @@ import {useRouter} from "next/navigation";
 
 export default function AdminSidebar() {
     const menuItems = [
-        { icon: LayoutGrid, label: "Dashboard", active: true },
-        { icon: BookOpen, label: "Course" },
+        { icon: LayoutGrid, label: "Dashboard", active: true, path: "/dashboard/admin" },
+        { icon: BookOpen, label: "File Upload", path: "/dashboard/admin/upload" },
         { icon: HelpCircle, label: "Resources" },
         { icon: MessageSquare, label: "Discussion" },
         { icon: Clock, label: "Schedules" },
@@ -50,6 +50,7 @@ export default function AdminSidebar() {
                     return (
                         <div
                             key={index}
+                            onClick={() => item.path && router.push(item.path)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 transform ${
                                 item.active
                                     ? "bg-white/20 text-white scale-105 shadow-md"
