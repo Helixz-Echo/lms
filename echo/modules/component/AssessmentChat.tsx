@@ -361,34 +361,24 @@ export default function AssessmentChat() {
 
         const nextData = await nextResponse.json();
 
-        // Brief acknowledgment
+     
         appendMessage({
           id: (Date.now() + 1).toString(),
-          text: "Thank you for your answer. Here's your next question:",
+          text: nextData.question,
           sender: "ai",
           timestamp: new Date(),
+          isQuestion: true,
+          questionId: nextData.questionId,
+          context: nextData.context || [],
         });
 
-        // Next question
-        setTimeout(() => {
-          appendMessage({
-            id: (Date.now() + 2).toString(),
-            text: nextData.question,
-            sender: "ai",
-            timestamp: new Date(),
-            isQuestion: true,
-            questionId: nextData.questionId,
-            context: nextData.context || [],
-          });
-
-          setAssessment({
-            ...assessment,
-            currentQuestionId: nextData.questionId,
-            currentQuestion: nextData.question,
-            currentContext: nextData.context || [],
-            answeredQuestions: newAnsweredQuestions,
-          });
-        }, 800);
+        setAssessment({
+          ...assessment,
+          currentQuestionId: nextData.questionId,
+          currentQuestion: nextData.question,
+          currentContext: nextData.context || [],
+          answeredQuestions: newAnsweredQuestions,
+        });
       }
     } catch (err) {
       console.error("Assessment error:", err);
