@@ -50,29 +50,26 @@ export default function Uploader() {
     };
 
     return (
-        <div className="flex items-center justify-center h-full bg-gray-50">
-            <div className="w-full max-w-lg p-8 space-y-8 bg-white border border-gray-200 rounded-2xl shadow-xl">
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold text-gray-800">Upload Your Files</h2>
-                    <p className="text-gray-500 mt-2">Upload a CSV file to get started</p>
-                </div>
-
+        <div className="w-full">
+            <div className="space-y-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="relative">
                         <input
-                            id="file-upload"
-                            name="file-upload"
+                            id="general-file-upload"
+                            name="general-file-upload"
                             type="file"
                             accept=".csv"
                             onChange={handleFileChange}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg text-center transition-colors duration-300 hover:border-blue-400 hover:bg-blue-50">
-                            <svg className="w-16 h-16 mb-4 text-gray-400 flex-shrink-0 block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v5a4 4 0 01-4 4H7z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11v6m0 0l-3-3m3 3l3-3"></path></svg>
-                            <p className="text-lg font-semibold text-gray-600">
-                                {file ? file.name : 'Drag & drop a file here, or click to select a file'}
+                        <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg text-center transition-colors duration-300 hover:border-blue-400 hover:bg-blue-50">
+                            <svg className="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p className="text-sm font-semibold text-gray-600">
+                                {file ? file.name : 'Choose CSV file or drag here'}
                             </p>
-                            <p className="text-sm text-gray-400 mt-2">CSV files only</p>
+                            <p className="text-xs text-gray-400 mt-1">CSV format only</p>
                         </div>
                     </div>
 
@@ -84,17 +81,29 @@ export default function Uploader() {
 
                     <button
                         type="submit"
-                        className="w-full px-6 py-3 text-lg font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-all duration-300 transform hover:scale-105"
+                        className="w-full px-6 py-3 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300"
                         disabled={!file || isUploading}
                     >
-                        {isUploading ? 'Uploading...' : 'Upload File'}
+                        {isUploading ? (
+                            <span className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Uploading...
+                            </span>
+                        ) : 'Upload File'}
                     </button>
                 </form>
 
                 {message && (
-                    <p className={`mt-4 text-sm text-center ${message.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
+                    <div className={`p-4 rounded-lg text-sm ${
+                        message.toLowerCase().includes('error') || message.toLowerCase().includes('failed')
+                            ? 'bg-red-50 text-red-700 border border-red-200' 
+                            : 'bg-green-50 text-green-700 border border-green-200'
+                    }`}>
                         {message}
-                    </p>
+                    </div>
                 )}
             </div>
         </div>

@@ -79,3 +79,48 @@ begin
   limit match_count;
 end;
 $$ language plpgsql;
+
+-- Training Sessions
+create table if not exists training_sessions (
+  id uuid primary key default gen_random_uuid(),
+  session_name text not null,
+  created_at timestamptz default now()
+);
+alter table training_sessions enable row level security;
+
+-- Insert 3 default training sessions
+insert into training_sessions (session_name) values
+  ('Session 1 - Foundation Training'),
+  ('Session 2 - Advanced Topics'),
+  ('Session 3 - Specialized Content')
+on conflict do nothing;
+
+-- Training Documents: stores uploaded files for each session
+create table if not exists training_documents (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid references training_sessions(id) on delete cascade,
+  file_name text not null,
+  file_size integer,
+  mime_type text,
+  created_at timestamptz default now()
+);
+alter table training_documents enable row level security;
+
+-- Training Chunks: embeddings per training document
+create table if not exists training_chunks (
+  id uuid primary key default gen_random_uuid(),
+  training_document_id uuid references training_documents(id) on delete cascade,
+  chunk_index integer not null,
+  content text not null,
+  row_start integer,
+  row_end integer,
+  embedding public.vector(384) not null,
+  created_at timestamptz default now() not null,
+  unique(training_document_id, chunk_index)
+);
+alter table training_chunks enable row level security;
+
+-- IVFFlat index for training_chunks
+create index if not exists training_chunks_embedding_ivfflat
+on training_chunks using ivfflat (embedding public.vector_cosine_ops)
+with (lists = 100);
