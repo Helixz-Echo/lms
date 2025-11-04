@@ -2,10 +2,19 @@ import Sidebar from "@/modules/component/Dashboard/trainer/sidebar";
 import Header from "@/modules/component/Dashboard/trainer/header";
 import StatCards from "@/modules/component/Dashboard/trainer/stat-cards";
 import TrainingGrid from "@/modules/component/Dashboard/trainer/training-grid";
+import AssessmentChat from "@/modules/component/AssessmentChat";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default async function TrainerDashboard() {
+export default async function TrainerDashboard({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    const params = await searchParams;
+    const viewParam = params?.view;
+    const view = Array.isArray(viewParam) ? viewParam[0] : viewParam;
+
+    if (view === "assessment") {
+        return <AssessmentChat />;
+    }
+
     return (
         <div className="flex h-screen bg-background">
 

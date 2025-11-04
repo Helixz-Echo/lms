@@ -1,18 +1,21 @@
 "use client"
 
-import { LayoutGrid, BookOpen, HelpCircle, MessageSquare, Clock, User, Settings, LogOut } from "lucide-react"
+import { LayoutGrid, BookOpen, HelpCircle, MessageSquare, Clock, User, Settings, LogOut, ClipboardCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import {useRouter} from "next/navigation";
 
 export default function Sidebar() {
+    const router = useRouter();
+    
     const menuItems = [
-        { icon: LayoutGrid, label: "Dashboard", active: true },
-        { icon: BookOpen, label: "Course" },
-        { icon: HelpCircle, label: "Resources" },
-        { icon: MessageSquare, label: "Discussion" },
-        { icon: Clock, label: "Schedules" },
-        { icon: User, label: "My Account" },
-        { icon: Settings, label: "Settings" },
+        { icon: LayoutGrid, label: "Dashboard", active: true, href: "/dashboard/trainer" },
+        { icon: BookOpen, label: "Course", href: "#" },
+        { icon: ClipboardCheck, label: "Assessment", href: "/dashboard/trainer?view=assessment" },
+        { icon: HelpCircle, label: "Resources", href: "#" },
+        { icon: MessageSquare, label: "Discussion", href: "#" },
+        { icon: Clock, label: "Schedules", href: "#" },
+        { icon: User, label: "My Account", href: "#" },
+        { icon: Settings, label: "Settings", href: "#" },
     ]
 
     // Animation trigger on mount safely
@@ -21,8 +24,6 @@ export default function Sidebar() {
         const timeout = setTimeout(() => setLoaded(true), 50) // small delay avoids sync setState
         return () => clearTimeout(timeout)
     }, [])
-
-    const router = useRouter()
 
     return (
         <aside
@@ -50,6 +51,7 @@ export default function Sidebar() {
                     return (
                         <div
                             key={index}
+                            onClick={() => item.href && router.push(item.href)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 transform ${
                                 item.active
                                     ? "bg-white/20 text-white scale-105 shadow-md"

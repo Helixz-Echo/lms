@@ -1,13 +1,16 @@
 "use client"
 
-import { LayoutGrid, BookOpen, HelpCircle, MessageSquare, Clock, User, Settings, LogOut } from "lucide-react"
+import { LayoutGrid, BookOpen, HelpCircle, MessageSquare, Clock, User, Settings, LogOut, ClipboardCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import {useRouter} from "next/navigation";
 
 export default function AdminSidebar() {
+    const router = useRouter();
+    
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true, path: "/dashboard/admin" },
         { icon: BookOpen, label: "File Upload", path: "/dashboard/admin/upload" },
+        { icon: ClipboardCheck, label: "Assessment", path: "/dashboard/admin?view=assessment" },
         { icon: HelpCircle, label: "Resources" },
         { icon: MessageSquare, label: "Discussion" },
         { icon: Clock, label: "Schedules" },
@@ -21,8 +24,6 @@ export default function AdminSidebar() {
         const timeout = setTimeout(() => setLoaded(true), 50) // small delay avoids sync setState
         return () => clearTimeout(timeout)
     }, [])
-
-    const router = useRouter()
 
     return (
         <aside

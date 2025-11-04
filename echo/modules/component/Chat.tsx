@@ -3,8 +3,15 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import type { ChatMessage } from "@/lib/chat";
 import { postChat } from "@/lib/chat";
+import { 
+  getSTTInstance, 
+  getTTSInstance, 
+  isSpeechRecognitionSupported, 
+  isTextToSpeechSupported 
+} from "@/lib/speech";
 
 interface Message {
   id: string;
@@ -18,18 +25,129 @@ export default function Chat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [sttSupported, setSttSupported] = useState(false);
+  const [ttsSupported, setTtsSupported] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
+    // Check browser support
+    setSttSupported(isSpeechRecognitionSupported());
+    setTtsSupported(isTextToSpeechSupported());
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  const appendMessage = (m: Message) => setMessages((prev) => [...prev, m]);
+  const appendMessage = (m: Message) => {
+    setMessages((prev) => [...prev, m]);
+    
+    // Auto-speak AI messages if TTS is enabled
+    if (m.sender === "ai" && ttsEnabled && ttsSupported) {
+      setTimeout(() => speakText(m.text), 300);
+    }
+  };
+
+  const speakText = (text: string) => {
+    if (!ttsSupported || !ttsEnabled) return;
+    
+    try {
+      const tts = getTTSInstance();
+      tts.speak(text, {
+        rate: 1.0,
+        pitch: 1.0,
+        volume: 1.0,
+        onEnd: () => setIsSpeaking(false),
+        onError: (error) => {
+          // Silently handle TTS errors
+          console.warn('TTS error (non-critical):', error);
+          setIsSpeaking(false);
+        },
+      });
+      setIsSpeaking(true);
+    } catch (error) {
+      console.warn("TTS not available:", error);
+      setIsSpeaking(false);
+    }
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+
+  const startListening = () => {
+    if (!sttSupported) {
+      alert("Speech recognition is not supported in your browser. Please try Chrome or Edge.");
+      return;
+    }
+
+    try {
+      const stt = getSTTInstance({
+        continuous: false,
+        interimResults: true,
+        language: "en-US",
+      });
+
+      stt.start(
+        (result) => {
+          if (result.isFinal) {
+            setMessage((prev) => prev + " " + result.transcript);
+            setIsListening(false);
+          } else {
+            // Show interim results
+            setMessage((prev) => {
+              const words = prev.split(" ");
+              words[words.length - 1] = result.transcript;
+              return words.join(" ");
+            });
+          }
+        },
+        (error) => {
+          console.error("STT error:", error);
+          setIsListening(false);
+          if (error === "not-allowed") {
+            alert("Microphone access was denied. Please enable it in your browser settings.");
+          }
+        }
+      );
+      setIsListening(true);
+    } catch (error) {
+      console.error("Failed to start listening:", error);
+      setIsListening(false);
+    }
+  };
+
+  const stopListening = () => {
+    try {
+      const stt = getSTTInstance();
+      stt.stop();
+      setIsListening(false);
+    } catch (error) {
+      console.error("Error stopping STT:", error);
+    }
+  };
+
+  const toggleTTS = () => {
+    if (isSpeaking) {
+      try {
+        const tts = getTTSInstance();
+        tts.stop();
+        setIsSpeaking(false);
+      } catch (error) {
+        console.warn("Error stopping TTS:", error);
+      }
+    }
+    setTtsEnabled(!ttsEnabled);
+  };
 
   const handleSignOut = async () => {
     try {
@@ -118,28 +236,57 @@ export default function Chat() {
             {/* Input */}
             <div className="border-t border-gray-200 bg-white/80 p-4 md:p-6">
               <div className="mx-auto w-full max-w-3xl">
+                {/* STT/TTS Controls */}
+                <div className="flex items-center justify-end gap-2 mb-3">
+                  {ttsSupported && (
+                    <button
+                      onClick={toggleTTS}
+                      title={ttsEnabled ? "Disable auto-speak" : "Enable auto-speak"}
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
+                        ttsEnabled 
+                          ? "bg-green-100 text-green-600 hover:bg-green-200" 
+                          : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                      }`}
+                    >
+                      {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                    </button>
+                  )}
+                </div>
+
                 <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-[#7B93DB]/30 bg-white px-4 py-3 shadow-lg transition-all">
                   <input
                     ref={inputRef}
                     type="text"
-                    placeholder="Message Soft GPT"
+                    placeholder={isListening ? "Listening..." : "Message Soft GPT"}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    disabled={isLoading}
+                    disabled={isLoading || isListening}
                     className="flex-1 bg-transparent font-['Roboto'] text-base text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C]/60 disabled:opacity-50 md:text-lg lg:text-xl"
                   />
                   <div className="flex items-center gap-2 md:gap-3">
-                    <button className="flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:scale-110 hover:bg-gray-100 md:h-10 md:w-10" aria-label="Attach file">
-                      {/* PaperClipIcon */}
-                    </button>
+                    {sttSupported && (
+                      <button
+                        onClick={toggleListening}
+                        disabled={isLoading}
+                        title={isListening ? "Stop listening" : "Start voice input"}
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+                          isListening
+                            ? "bg-red-500 text-white animate-pulse hover:bg-red-600"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        aria-label={isListening ? "Stop listening" : "Start voice input"}
+                      >
+                        {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                      </button>
+                    )}
                     <button
                       onClick={handleSendMessage}
                       disabled={!message.trim() || isLoading}
                       className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-[#7B93DB] to-[#9DB3E8] shadow-lg transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label="Send message"
                     >
-                      {/* SendIcon */}
+                      <span className="text-white text-xl">→</span>
                     </button>
                   </div>
                 </div>

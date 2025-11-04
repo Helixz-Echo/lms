@@ -4,13 +4,19 @@ import AdminStatCards from "@/modules/component/Dashboard/admin/admin_stat-cards
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Chat from "@/modules/component/Chat";
+import AssessmentChat from "@/modules/component/AssessmentChat";
 
-export default async function AdminDashboard({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-    const viewParam = searchParams?.view;
+export default async function AdminDashboard({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    const params = await searchParams;
+    const viewParam = params?.view;
     const view = Array.isArray(viewParam) ? viewParam[0] : viewParam;
 
     if (view === "discussion") {
         return <Chat />;
+    }
+
+    if (view === "assessment") {
+        return <AssessmentChat />;
     }
 
     return (
