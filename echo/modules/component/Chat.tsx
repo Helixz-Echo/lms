@@ -7,10 +7,14 @@ import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import type { ChatMessage } from "@/lib/chat";
 import { postChat } from "@/lib/chat";
 import { 
-  getSTTInstance, 
-  getTTSInstance, 
-  isSpeechRecognitionSupported, 
-  isTextToSpeechSupported 
+  speak,
+  stopSpeaking,
+  startListening,
+  stopListening,
+  isSTTSupported,
+  isTTSSupported,
+  cleanup,
+  SpeechRecognitionCallbacks,
 } from "@/lib/speech";
 
 interface Message {
@@ -30,14 +34,20 @@ export default function Chat() {
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [sttSupported, setSttSupported] = useState(false);
   const [ttsSupported, setTtsSupported] = useState(false);
+  const [finalTranscript, setFinalTranscript] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
     // Check browser support
-    setSttSupported(isSpeechRecognitionSupported());
-    setTtsSupported(isTextToSpeechSupported());
+    setSttSupported(isSTTSupported());
+    setTtsSupported(isTTSSupported());
+    
+    // Cleanup on unmount
+    return () => {
+      cleanup();
+    };
   }, []);
 
   useEffect(() => {
@@ -49,102 +59,71 @@ export default function Chat() {
     
     // Auto-speak AI messages if TTS is enabled
     if (m.sender === "ai" && ttsEnabled && ttsSupported) {
-      setTimeout(() => speakText(m.text), 300);
-    }
-  };
-
-  const speakText = (text: string) => {
-    if (!ttsSupported || !ttsEnabled) return;
-    
-    try {
-      const tts = getTTSInstance();
-      tts.speak(text, {
-        rate: 1.0,
-        pitch: 1.0,
-        volume: 1.0,
-        onEnd: () => setIsSpeaking(false),
-        onError: (error) => {
-          // Silently handle TTS errors
-          console.warn('TTS error (non-critical):', error);
-          setIsSpeaking(false);
-        },
-      });
+      speak(
+        m.text,
+        () => setIsSpeaking(false),
+        () => setIsSpeaking(false)
+      );
       setIsSpeaking(true);
-    } catch (error) {
-      console.warn("TTS not available:", error);
-      setIsSpeaking(false);
     }
   };
 
   const toggleListening = () => {
     if (isListening) {
       stopListening();
+      setIsListening(false);
     } else {
-      startListening();
+      handleStartListening();
     }
   };
 
-  const startListening = () => {
+  const handleStartListening = () => {
     if (!sttSupported) {
       alert("Speech recognition is not supported in your browser. Please try Chrome or Edge.");
       return;
     }
 
-    try {
-      const stt = getSTTInstance({
-        continuous: false,
-        interimResults: true,
-        language: "en-US",
-      });
-
-      stt.start(
-        (result) => {
-          if (result.isFinal) {
-            setMessage((prev) => prev + " " + result.transcript);
-            setIsListening(false);
-          } else {
-            // Show interim results
-            setMessage((prev) => {
-              const words = prev.split(" ");
-              words[words.length - 1] = result.transcript;
-              return words.join(" ");
-            });
-          }
-        },
-        (error) => {
-          console.error("STT error:", error);
-          setIsListening(false);
-          if (error === "not-allowed") {
-            alert("Microphone access was denied. Please enable it in your browser settings.");
-          }
+    const callbacks: SpeechRecognitionCallbacks = {
+      onResult: (result) => {
+        if (result.isFinal) {
+          // Only add the new part that wasn't in finalTranscript
+          setFinalTranscript((prev) => {
+            const newPart = result.transcript;
+            if (prev.includes(newPart)) {
+              return prev; // Already added
+            }
+            const combined = prev ? prev + " " + newPart : newPart;
+            setMessage(combined.trim());
+            return combined;
+          });
+        } else {
+          // Show interim results temporarily
+          setMessage((prev) => {
+            const base = finalTranscript || "";
+            return base ? base + " " + result.transcript : result.transcript;
+          });
         }
-      );
-      setIsListening(true);
-    } catch (error) {
-      console.error("Failed to start listening:", error);
-      setIsListening(false);
-    }
-  };
+      },
+      onStart: () => {
+        setIsListening(true);
+        setFinalTranscript("");
+      },
+      onEnd: () => setIsListening(false),
+      onError: (error) => {
+        setIsListening(false);
+        if (error === "not-allowed") {
+          alert("Microphone access was denied. Please enable it in your browser settings.");
+        }
+      },
+    };
 
-  const stopListening = () => {
-    try {
-      const stt = getSTTInstance();
-      stt.stop();
-      setIsListening(false);
-    } catch (error) {
-      console.error("Error stopping STT:", error);
-    }
+    startListening(callbacks);
   };
 
   const toggleTTS = () => {
     if (isSpeaking) {
-      try {
-        const tts = getTTSInstance();
-        tts.stop();
-        setIsSpeaking(false);
-      } catch (error) {
-        console.warn("Error stopping TTS:", error);
-      }
+      stopSpeaking();
+      setIsSpeaking(false);
     }
     setTtsEnabled(!ttsEnabled);
   };
