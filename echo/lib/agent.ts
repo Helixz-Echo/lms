@@ -1,15 +1,18 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenAI } from "@langchain/openai";
 import { SYSTEM_PROMPT } from "./prompt";
 import { retrieveContext } from "./retriever";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
 
 export async function runAgentChat(history: any[], question: string) {
-    const llm = new ChatGoogleGenerativeAI({
-        model: process.env.GEMINI_MODEL || "gemini-1.5-pro",
-        apiKey: process.env.GEMINI_API_KEY,
+    const llm = new ChatOpenAI({
+        model: process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001",
+        apiKey: process.env.OPENROUTER_API_KEY,
         temperature: 0.1,
-        maxOutputTokens: 1024,
+        maxTokens: 1024,
+        configuration: {
+            baseURL: "https://openrouter.ai/api/v1",
+        },
     });
 
     const context = await retrieveContext(question);

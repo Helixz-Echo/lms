@@ -1,14 +1,17 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenAI } from "@langchain/openai";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import type { Question, GraderResult } from "@/lib/types";
 import { retrieveContext } from "@/lib/retriever"; // your existing retriever over Supabase
 
-const graderModel = new ChatGoogleGenerativeAI({
-    model: process.env.GEMINI_MODEL || "gemini-1.5-pro",
-    apiKey: process.env.GEMINI_API_KEY,
+const graderModel = new ChatOpenAI({
+    model: process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001",
+    apiKey: process.env.OPENROUTER_API_KEY,
     temperature: 0.1,
-    maxOutputTokens: 512,
+    maxTokens: 512,
+    configuration: {
+        baseURL: "https://openrouter.ai/api/v1",
+    },
 });
 
 const GRADER_SYSTEM =
