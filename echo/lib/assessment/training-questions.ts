@@ -1,8 +1,8 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { retrieveContext } from "@/lib/retriever";
-import { supabaseAdmin } from "./supabase";
+import { retrieveContext } from "@/lib/ai/retriever";
+import { supabaseAdmin } from "@/lib/database/supabase";
 
 const llm = new ChatOpenAI({
     model: process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001",

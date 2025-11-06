@@ -1,9 +1,8 @@
 "use client";
 
-'use client';
-
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface TrainingSession {
   id: string;
@@ -15,6 +14,7 @@ interface TrainingSession {
 
 export default function TrainingGrid() {
   const [trainingSessions, setTrainingSessions] = useState<TrainingSession[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -34,12 +34,18 @@ export default function TrainingGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
       {trainingSessions.map((session, index) => (
-        <Link key={session.id} href={`/chat?session_id=${session.id}`} className="block">
-          <div
-            className={`cursor-pointer bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm transform transition-all duration-500 hover:shadow-lg hover:-translate-y-2 hover:scale-105
-                        opacity-0 animate-fadeIn`}
-            style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
-          >
+        <div
+          key={session.id}
+          className={`cursor-pointer bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm transform transition-all duration-500 hover:shadow-lg hover:-translate-y-2 hover:scale-105
+                      opacity-0 animate-fadeIn`}
+          style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
+          onClick={(e) => {
+            // Only navigate to chat if not clicking the assessment button
+            if (!(e.target as HTMLElement).closest('a')) {
+              router.push(`/chat?session_id=${session.id}`);
+            }
+          }}
+        >
             {/* Image Section */}
             <div
               className={`relative h-48 ${session.bgColor} overflow-hidden flex items-center justify-center transition-transform duration-500 hover:scale-110`}
@@ -65,7 +71,6 @@ export default function TrainingGrid() {
               </div>
             </div>
           </div>
-        </Link>
       ))}
     </div>
   );

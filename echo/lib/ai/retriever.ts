@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './supabase';
+import { supabaseAdmin } from '@/lib/database/supabase';
 import { embed } from './embeddings';
 
 export async function retrieveContext(session_id: string, query: string, k: number = 6) {

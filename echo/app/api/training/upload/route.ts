@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { embed } from '@/lib/embeddings';
+import { supabaseAdmin } from '@/lib/database/supabase';
+import { embed } from '@/lib/ai/embeddings';
 
 export async function POST(req: NextRequest) {
     try {

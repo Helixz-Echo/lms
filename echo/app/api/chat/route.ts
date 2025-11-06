@@ -1,6 +1,6 @@
 // app/api/chat/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { runAgentChat } from '@/lib/agent';
+import { runAgentChat } from '@/lib/ai/agent';
 
 type Role = 'user' | 'assistant' | 'system' | 'tool';
 export type ChatMessage = {

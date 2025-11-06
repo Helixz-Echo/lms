@@ -1,8 +1,8 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import type { Question, GraderResult } from "@/lib/types";
-import { retrieveContext } from "@/lib/retriever"; // your existing retriever over Supabase
+import type { Question, GraderResult } from "@/lib/assessment/types";
+import { retrieveContext } from "@/lib/ai/retriever";
 
 const graderModel = new ChatOpenAI({
     model: process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001",

@@ -4,8 +4,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
-import type { ChatMessage } from "@/lib/chat";
-import { postChat } from "@/lib/chat";
+import type { ChatMessage } from "@/lib/ai/chat";
+import { postChat } from "@/lib/ai/chat";
 import { 
   speak,
   stopSpeaking,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateFinalFeedback, generateAndSaveAssessmentQuestions } from '@/lib/training-questions';
-import { supabaseAdmin } from "@/lib/supabase";
+import { generateFinalFeedback, generateAndSaveAssessmentQuestions } from '@/lib/assessment/training-questions';
+import { supabaseAdmin } from "@/lib/database/supabase";
 
 export const runtime = 'nodejs';
 

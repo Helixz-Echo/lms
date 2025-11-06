@@ -1,9 +1,9 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { SYSTEM_PROMPT } from "./prompt";
+import { SYSTEM_PROMPT } from "@/lib/prompts/chat-prompt";
 import { retrieveContext } from "./retriever";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
-import { supabaseAdmin } from "./supabase";
+import { supabaseAdmin } from "@/lib/database/supabase";
 
 export async function runAgentChat(session_id: string, history: any[], question: string) {
     const llm = new ChatOpenAI({
