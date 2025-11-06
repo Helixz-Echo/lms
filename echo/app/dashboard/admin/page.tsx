@@ -3,20 +3,16 @@ import AdminHeader from "@/modules/component/Dashboard/admin/admin_header";
 import AdminStatCards from "@/modules/component/Dashboard/admin/admin_stat-cards";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Chat from "@/modules/component/Chat";
 import AssessmentChat from "@/modules/component/AssessmentChat";
 
 export default async function AdminDashboard({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const params = await searchParams;
     const viewParam = params?.view;
     const view = Array.isArray(viewParam) ? viewParam[0] : viewParam;
+    const sessionId = Array.isArray(params?.session_id) ? params.session_id[0] : params?.session_id;
 
-    if (view === "discussion") {
-        return <Chat />;
-    }
-
-    if (view === "assessment") {
-        return <AssessmentChat />;
+    if (view === "assessment" && sessionId) {
+        return <AssessmentChat session_id={sessionId} />;
     }
 
     return (
@@ -36,7 +32,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                         </div>
 
                         <div className="opacity-0 animate-fadeInSlide delay-300">
-                            <Chat />
+                            <AdminStatCards />
                         </div>
 
                     </div>
