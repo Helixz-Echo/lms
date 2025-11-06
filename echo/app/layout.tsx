@@ -21,8 +21,8 @@ const sourceSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "Soft GPT - AI Chat Assistant",
-  description: "AI-powered chat interface with modern design",
+  title: "Echo LMS - AI Training Assistant",
+  description: "AI-powered learning management system with assessment and training",
 };
 
 export default function RootLayout({

@@ -40,9 +40,9 @@ export default function TrainingGrid() {
                       opacity-0 animate-fadeIn`}
           style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
           onClick={(e) => {
-            // Only navigate to chat if not clicking the assessment button
+            // Only navigate to assessment if not clicking another button
             if (!(e.target as HTMLElement).closest('a')) {
-              router.push(`/chat?session_id=${session.id}`);
+              router.push(`/dashboard/trainer?view=assessment&session_id=${session.id}`);
             }
           }}
         >

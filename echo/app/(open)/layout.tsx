@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Authentication - Soft GPT",
-    description: "Sign in to access Soft GPT AI chat assistant",
+    title: "Authentication - Echo LMS",
+    description: "Sign in to access Echo LMS training platform",
 };
 
 export default function AuthLayout({

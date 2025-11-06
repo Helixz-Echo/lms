@@ -16,9 +16,6 @@ export const ROUTES = {
     SESSIONS: '/dashboard/admin/sessions',
     TRAINING_DOCUMENTS: '/dashboard/admin/training-documents',
   },
-  
-  // Chat routes
-  CHAT: '/chat',
 } as const;
 
 export const API_ROUTES = {
@@ -41,9 +38,6 @@ export const API_ROUTES = {
     SESSIONS: '/api/training/sessions',
     CLEAR: '/api/training/clear',
   },
-  
-  // Chat endpoints
-  CHAT: '/api/chat',
   
   // Upload endpoints
   UPLOAD: '/api/upload',
