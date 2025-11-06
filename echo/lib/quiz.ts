@@ -21,12 +21,14 @@ const GRADER_SYSTEM =
     `Give one short reason and an actionable next_hint if not correct.\n` +
     `OUTPUT ONLY valid JSON: {"verdict":"...","reasons":"...","next_hint":"..."}`;
 
-export async function gradeAnswer({ question, userText }: { question: Question; userText: string }): Promise<GraderResult> {
+export async function gradeAnswer({ question, userText, sessionId }: { question: Question; userText: string; sessionId?: string }): Promise<GraderResult> {
     // Pull KB snippets to ground hints (non-fatal if retriever fails)
     let snippets: { id: string; text: string }[] = [];
     try {
-        const ctx = await retrieveContext(question.text, 6);
-        snippets = ctx?.map((c: any) => ({ id: c.id || c.chunk_id || "doc", text: c.text || c.content })) || [];
+        if (sessionId) {
+            const ctx = await retrieveContext(sessionId, question.text, 6);
+            snippets = ctx?.map((c: any) => ({ id: c.id || c.chunk_id || "doc", text: c.text || c.content })) || [];
+        }
     } catch {}
 
     const chain = RunnableSequence.from<any, string>([
