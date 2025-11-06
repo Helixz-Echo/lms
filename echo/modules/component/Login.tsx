@@ -3,6 +3,13 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Import Turret Road font
+const TurretRoadFont = () => (
+    <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Turret+Road:wght@800&display=swap');
+    `}</style>
+);
+
 type Props = {
     redirectTo?: string; // e.g. "/dashboard"
 };
@@ -74,11 +81,22 @@ export default function Login({ redirectTo = "/" }: Props) {
     }
 
     return (
-        <div className="mx-auto w-full max-w-md rounded-2xl border border-[#B7BCC9] bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8">
-            <div className="mb-6 text-center">
-                <h1 className="font-['IBM_Plex_Mono'] text-2xl font-bold text-[#3D2D4C] sm:text-3xl">
-                    Welcome to Soft GPT
-                </h1>
+        <div 
+            className="fixed inset-0 w-full h-full flex items-center justify-center p-4"
+            style={{
+                backgroundImage: "url('https://i.postimg.cc/vmx4Lq0w/bg1.jpg')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundAttachment: 'fixed'
+            }}
+        >
+            <div className="mx-auto w-full max-w-md rounded-2xl border border-[#B7BCC9] bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8">
+                <TurretRoadFont />
+                <div className="mb-6 text-center">
+                    <h1 style={{ fontFamily: "'Turret Road', cursive" }} className="text-2xl font-bold text-[#3D2D4C] sm:text-3xl">
+                        Welcome to Echo GPT 
+                    </h1>
                 <p className="mt-2 font-['Roboto'] text-sm text-[#3D2D4C] opacity-70">
                     Sign in to continue to your AI assistant
                 </p>
@@ -154,6 +172,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                     By continuing, you agree to our Terms & Privacy.
                 </div>
             </form>
+        </div>
         </div>
     );
 }
