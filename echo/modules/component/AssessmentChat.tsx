@@ -27,18 +27,19 @@ interface Message {
 
 interface AssessmentSession {
   isActive: boolean;
-  currentQuestionId: string | null;
-  currentQuestion: string | null;
-  currentContext: string[];
+  questions: Array<{ id: string; question_text: string; context?: string[] }>;
+  currentQuestionIndex: number;
   answeredQuestions: Array<{
     question: string;
     answer: string;
     evaluation?: string;
+    questionId: string;
+    isGoodAnswer?: boolean;
   }>;
   totalQuestions: number;
 }
 
-export default function AssessmentChat() {
+export default function AssessmentChat({ session_id }: { session_id: string }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -60,11 +61,10 @@ export default function AssessmentChat() {
   }>({ questions: [] });
   const [assessment, setAssessment] = useState<AssessmentSession>({
     isActive: false,
-    currentQuestionId: null,
-    currentQuestion: null,
-    currentContext: [],
+    questions: [],
+    currentQuestionIndex: 0,
     answeredQuestions: [],
-    totalQuestions: 5, // Default number of questions
+    totalQuestions: 10, // Default number of questions
   });
   const inputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -242,7 +242,7 @@ export default function AssessmentChat() {
       const response = await fetch("/api/assessment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "start" }),
+        body: JSON.stringify({ action: "start", session_id }),
       });
 
       const data = await response.json();
@@ -257,23 +257,23 @@ export default function AssessmentChat() {
 
       // First question
       setTimeout(() => {
+        const firstQuestion = data.questions[0];
         appendMessage({
           id: (Date.now() + 1).toString(),
-          text: data.question,
+          text: firstQuestion.question_text,
           sender: "ai",
           timestamp: new Date(),
           isQuestion: true,
-          questionId: data.questionId,
-          context: data.context || [],
+          questionId: firstQuestion.id,
+          context: firstQuestion.context || [],
         });
 
         setAssessment({
           isActive: true,
-          currentQuestionId: data.questionId,
-          currentQuestion: data.question,
-          currentContext: data.context || [],
+          questions: data.questions,
+          currentQuestionIndex: 0,
           answeredQuestions: [],
-          totalQuestions: 5,
+          totalQuestions: data.questions.length,
         });
       }, 500);
     } catch (err) {
@@ -304,12 +304,28 @@ export default function AssessmentChat() {
     setIsLoading(true);
 
     try {
-      // Store the answer with context
+      const currentQuestion = assessment.questions[assessment.currentQuestionIndex];
+
+      // Evaluate the answer
+      const evalResponse = await fetch("/api/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: currentQuestion.question_text,
+          userAnswer: userMessage.text,
+          context: currentQuestion.context || [],
+        }),
+      });
+      const evalData = await evalResponse.json();
+
+      // Store the answer with context and evaluation
       const newAnsweredQuestions = [
         ...assessment.answeredQuestions,
         {
-          question: assessment.currentQuestion!,
+          question: currentQuestion.question_text,
           answer: userMessage.text,
+          questionId: currentQuestion.id,
+          isGoodAnswer: evalData.isGoodAnswer,
         },
       ];
 
@@ -318,9 +334,9 @@ export default function AssessmentChat() {
         questions: [
           ...assessmentData.questions,
           {
-            question: assessment.currentQuestion!,
+            question: currentQuestion.question_text,
             answer: userMessage.text,
-            context: assessment.currentContext,
+            context: currentQuestion.context || [],
           },
         ],
       };
@@ -328,6 +344,17 @@ export default function AssessmentChat() {
 
       // Check if we've reached the total questions limit
       if (newAnsweredQuestions.length >= assessment.totalQuestions) {
+        // Calculate the score
+        const correctAnswers = newAnsweredQuestions.filter(q => q.isGoodAnswer).length;
+        const score = Math.round((correctAnswers / assessment.totalQuestions) * 100);
+
+        // Update the score in the database
+        await fetch("/api/score", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id, score }),
+        });
+
         // Generate final feedback
         const feedbackResponse = await fetch("/api/assessment", {
           method: "POST",
@@ -340,6 +367,7 @@ export default function AssessmentChat() {
                 role: m.isQuestion ? "assistant" : "user",
                 content: m.text,
               })),
+            session_id, // Pass session_id for finish action
           }),
         });
 
@@ -353,40 +381,26 @@ export default function AssessmentChat() {
         setAssessment({
           ...assessment,
           isActive: false,
-          currentQuestionId: null,
-          currentQuestion: null,
           answeredQuestions: newAnsweredQuestions,
         });
       } else {
-        // Get next question
-        const previousQuestions = newAnsweredQuestions.map((q) => q.question);
-        const nextResponse = await fetch("/api/assessment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "next",
-            previousQuestions,
-          }),
-        });
+        // Get next question from the state
+        const nextQuestionIndex = assessment.currentQuestionIndex + 1;
+        const nextQuestion = assessment.questions[nextQuestionIndex];
 
-        const nextData = await nextResponse.json();
-
-     
         appendMessage({
           id: (Date.now() + 1).toString(),
-          text: nextData.question,
+          text: nextQuestion.question_text,
           sender: "ai",
           timestamp: new Date(),
           isQuestion: true,
-          questionId: nextData.questionId,
-          context: nextData.context || [],
+          questionId: nextQuestion.id,
+          context: nextQuestion.context || [],
         });
 
         setAssessment({
           ...assessment,
-          currentQuestionId: nextData.questionId,
-          currentQuestion: nextData.question,
-          currentContext: nextData.context || [],
+          currentQuestionIndex: nextQuestionIndex,
           answeredQuestions: newAnsweredQuestions,
         });
       }

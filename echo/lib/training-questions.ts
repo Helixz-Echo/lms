@@ -2,6 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { retrieveContext } from "@/lib/retriever";
+import { supabaseAdmin } from "./supabase";
 
 const llm = new ChatOpenAI({
     model: process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001",
@@ -13,20 +14,23 @@ const llm = new ChatOpenAI({
     },
 });
 
-const QUESTION_GENERATOR_PROMPT = `You are a training assessment generator. Based on the provided knowledge base content, generate ONE insightful training question and ask it 
-give it like human asked question.
+const QUESTION_GENERATOR_PROMPT = `You are a training assessment generator. Based on the provided knowledge base content, generate ONE insightful and DIVERSE training question.
 
 Rules:
-- Generate ONLY ONE question based on the context provided
-- The question should test understanding of key concepts from the knowledge base
-- Make it practical and relevant to real-world application
-- Output ONLY the question text, no preamble or formatting
-- Keep the question clear and concise (1-2 sentences max)
+- Generate ONLY ONE question based on the context provided.
+- The question should test understanding of key concepts from the knowledge base.
+- Make it practical and relevant to real-world application.
+- Output ONLY the question text, no preamble or formatting.
+- Keep the question clear and concise (1-2 sentences max).
+- **CRITICAL:** The generated question MUST be different from the questions in the "Previous Questions" list.
 
 Context from knowledge base:
 {context}
 
-Generate ONE training question:`;
+Previous Questions:
+{previous_questions}
+
+Generate ONE new, unique training question:`;
 
 const FEEDBACK_GENERATOR_PROMPT = `You are a professional training feedback provider. Review the user's performance across all questions and answers.
 
@@ -68,13 +72,37 @@ export interface TrainingQuestion {
     context: string[];
 }
 
-export async function generateQuestionFromKnowledge(previousQuestions: string[] = []): Promise<TrainingQuestion> {
-    // Get random context from knowledge base
-    const searchQuery = previousQuestions.length > 0 
-        ? `training topic ${Math.random()}` 
-        : "training concepts";
+export async function generateQuestionFromKnowledge(session_id: string, previousQuestions: string[] = []): Promise<TrainingQuestion> {
+    // Get a random chunk to use as a seed for the search query
+    const { data: randomChunk, error: randomChunkError } = await supabaseAdmin.rpc('get_random_chunk', { p_session_id: session_id });
+
+    if (randomChunkError || !randomChunk || randomChunk.length === 0) {
+        console.error("Error getting random chunk:", randomChunkError);
+        // Fallback to a generic query if a random chunk can't be retrieved
+        const searchQuery = previousQuestions.length > 0 
+            ? `training topic ${Math.random()}` 
+            : "training concepts";
+        const context = await retrieveContext(session_id, searchQuery, 3);
+        const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
+        const chain = RunnableSequence.from([
+            llm,
+            new StringOutputParser(),
+        ]);
+        const previousQuestionsText = previousQuestions.length > 0 ? previousQuestions.join("\n") : "None";
+        const prompt = QUESTION_GENERATOR_PROMPT
+            .replace("{context}", contextText)
+            .replace("{previous_questions}", previousQuestionsText);
+        const question = await chain.invoke(prompt);
+        return {
+            id: Date.now().toString(),
+            question: question.trim(),
+            context: context.map((c: any) => c.text || c.content)
+        };
+    }
+
+    const searchQuery = randomChunk[0].content;
     
-    const context = await retrieveContext(searchQuery, 3);
+    const context = await retrieveContext(session_id, searchQuery, 3);
     
     const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
     
@@ -83,7 +111,10 @@ export async function generateQuestionFromKnowledge(previousQuestions: string[] 
         new StringOutputParser(),
     ]);
 
-    const prompt = QUESTION_GENERATOR_PROMPT.replace("{context}", contextText);
+    const previousQuestionsText = previousQuestions.length > 0 ? previousQuestions.join("\n") : "None";
+    const prompt = QUESTION_GENERATOR_PROMPT
+        .replace("{context}", contextText)
+        .replace("{previous_questions}", previousQuestionsText);
     const question = await chain.invoke(prompt);
 
     return {
@@ -91,6 +122,43 @@ export async function generateQuestionFromKnowledge(previousQuestions: string[] 
         question: question.trim(),
         context: context.map((c: any) => c.text || c.content)
     };
+}
+
+export async function generateAndSaveAssessmentQuestions(session_id: string, numberOfQuestions: number = 10): Promise<any[]> {
+    // First, check if questions already exist for this session
+    const { data: existingQuestions, error: existingError } = await supabaseAdmin
+        .from('training_assessment_questions')
+        .select('*')
+        .eq('session_id', session_id);
+
+    if (existingError) {
+        console.error("Error checking for existing questions:", existingError);
+        throw existingError;
+    }
+
+    if (existingQuestions && existingQuestions.length > 0) {
+        console.log("Retrieved existing questions:", existingQuestions);
+        return existingQuestions;
+    }
+
+    // If no questions exist, generate and save them
+    const generatedQuestions: TrainingQuestion[] = [];
+    for (let i = 0; i < numberOfQuestions; i++) {
+        const newQuestion = await generateQuestionFromKnowledge(session_id, generatedQuestions.map(q => q.question));
+        generatedQuestions.push(newQuestion);
+    }
+
+    const questionsToInsert = generatedQuestions.map(q => ({ session_id: session_id, question_text: q.question }));
+
+    const { data, error } = await supabaseAdmin.from('training_assessment_questions').insert(questionsToInsert).select();
+
+    if (error || !data) {
+        console.error("Error saving questions to DB:", error);
+        throw error || new Error('Failed to save questions');
+    }
+
+    console.log("Generated and saved new questions:", data);
+    return data;
 }
 
 export async function generateFinalFeedback(conversationHistory: any[]): Promise<string> {
@@ -115,20 +183,7 @@ export async function evaluateAnswer(question: string, userAnswer: string, conte
 }> {
     const contextText = context.join("\n\n");
     
-    const evaluationPrompt = `You are evaluating a student's answer to a training question.
-
-Question: ${question}
-
-Student's Answer: ${userAnswer}
-
-Reference Context:
-${contextText}
-
-Provide:
-1. Brief evaluation of the answer (2-3 sentences)
-2. Whether the answer demonstrates understanding (yes/no)
-
-Be constructive and encouraging. Format: First the evaluation, then on a new line: "Understanding: yes" or "Understanding: no"`;
+    const evaluationPrompt = `You are evaluating a student's answer to a training question.\n\nQuestion: ${question}\n\nStudent's Answer: ${userAnswer}\n\nReference Context:\n${contextText}\n\nProvide:\n1. Brief evaluation of the answer (2-3 sentences)\n2. Whether the answer demonstrates understanding (yes/no)\n\nBe constructive and encouraging. Format: First the evaluation, then on a new line: "Understanding: yes" or "Understanding: no"`;
 
     const chain = RunnableSequence.from([
         llm,

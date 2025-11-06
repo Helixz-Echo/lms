@@ -16,6 +16,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const history: ChatMessage[] = Array.isArray(body?.history) ? body.history : [];
     const questionRaw: unknown = body?.question;
+    const session_id: string | undefined = body?.session_id;
+
+    if (!session_id) {
+      return NextResponse.json(
+          { error: 'Session ID not provided' },
+          { status: 400 },
+      );
+    }
 
     const hasQuestion =
         typeof questionRaw === 'string' && questionRaw.trim().length > 0;
@@ -37,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Your existing agent call — keep its return shape unchanged for the UI.
-    const result = await runAgentChat(history, effectiveQuestion);
+    const result = await runAgentChat(session_id, history, effectiveQuestion);
 
     return NextResponse.json(result, { status: 200 });
   } catch (err) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateQuestionFromKnowledge, generateFinalFeedback, evaluateAnswer } from '@/lib/training-questions';
+import { generateQuestionFromKnowledge, generateFinalFeedback, evaluateAnswer, generateAndSaveAssessmentQuestions } from '@/lib/training-questions';
+import { supabaseAdmin } from "@/lib/supabase";
 
 export const runtime = 'nodejs';
 
@@ -7,34 +8,38 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const action = body.action; // 'start', 'next', 'evaluate', 'finish'
+    const session_id: string | undefined = body.session_id;
+
+    if (!session_id) {
+      return NextResponse.json(
+          { error: 'Session ID not provided' },
+          { status: 400 },
+      );
+    }
     
     switch (action) {
       case 'start': {
-        // Start a new assessment session - generate first question
-        const question = await generateQuestionFromKnowledge();
+        const questions = await generateAndSaveAssessmentQuestions(session_id);
+
+        if (!questions || questions.length === 0) {
+          return NextResponse.json(
+            { error: 'Failed to generate or retrieve assessment questions' },
+            { status: 500 }
+          );
+        }
+
         return NextResponse.json({
-          question: question.question,
-          questionId: question.id,
+          questions: questions,
           message: "Welcome to your training assessment! I'll ask you a few questions based on the knowledge base. Take your time and answer thoughtfully."
-        });
-      }
-      
-      case 'next': {
-        // Generate next question
-        const previousQuestions = body.previousQuestions || [];
-        const question = await generateQuestionFromKnowledge(previousQuestions);
-        return NextResponse.json({
-          question: question.question,
-          questionId: question.id
         });
       }
       
       case 'evaluate': {
         // Evaluate user's answer
-        const { question, answer, context } = body;
-        if (!question || !answer) {
+        const { question, answer, context, questionId } = body;
+        if (!question || !answer || !questionId) {
           return NextResponse.json(
-            { error: 'Question and answer are required' },
+            { error: 'Question, answer, and questionId are required' },
             { status: 400 }
           );
         }
@@ -62,7 +67,7 @@ export async function POST(req: NextRequest) {
       
       default:
         return NextResponse.json(
-          { error: 'Invalid action. Use: start, next, evaluate, or finish' },
+          { error: 'Invalid action. Use: start, evaluate, or finish' },
           { status: 400 }
         );
     }

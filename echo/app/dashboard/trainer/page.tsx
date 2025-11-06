@@ -10,9 +10,15 @@ export default async function TrainerDashboard({ searchParams }: { searchParams:
     const params = await searchParams;
     const viewParam = params?.view;
     const view = Array.isArray(viewParam) ? viewParam[0] : viewParam;
+    const sessionIdParam = params?.session_id;
+    const session_id = Array.isArray(sessionIdParam) ? sessionIdParam[0] : sessionIdParam;
 
     if (view === "assessment") {
-        return <AssessmentChat />;
+        if (!session_id) {
+            // Handle case where session_id is missing for assessment view
+            return <div>Error: Session ID is required for assessment.</div>;
+        }
+        return <AssessmentChat session_id={session_id} />;
     }
 
     return (

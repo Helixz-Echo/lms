@@ -71,24 +71,11 @@ export async function POST(req: NextRequest) {
         
         console.log("Parsed Data (first 2 rows):", parsedData.slice(0, 2));
 
-        // Create chunks from CSV data
-        const chunks: any[] = [];
-        let currentChunk = "";
-        let rowStart = 0;
-
-        parsedData.forEach((row: any, i) => {
-            const rowText = JSON.stringify(row);
-            if (currentChunk.length + rowText.length > 1200) {
-                chunks.push({ content: currentChunk, row_start: rowStart, row_end: i });
-                currentChunk = "";
-                rowStart = i + 1;
-            }
-            currentChunk += rowText + '\n';
+        // Create chunks from CSV data - one chunk per row
+        const chunks = parsedData.map((row: any, i) => {
+            const content = JSON.stringify(row);
+            return { content: content, row_start: i, row_end: i };
         });
-
-        if (currentChunk) {
-            chunks.push({ content: currentChunk, row_start: rowStart, row_end: parsedData.length });
-        }
 
         // Generate embeddings
         const embeddings = await embed(chunks.map(chunk => chunk.content));

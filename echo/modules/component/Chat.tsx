@@ -24,7 +24,7 @@ interface Message {
   timestamp: Date;
 }
 
-export default function Chat() {
+export default function Chat({ session_id }: { session_id?: string }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -148,6 +148,17 @@ export default function Chat() {
   const handleSendMessage = async () => {
     if (!message.trim() || isLoading) return;
 
+    if (!session_id) {
+      console.error("Session ID is not provided to Chat component.");
+      appendMessage({
+        id: (Date.now() + 2).toString(),
+        text: "⚠️ Chat session not initialized. Please try again later.",
+        sender: "ai",
+        timestamp: new Date(),
+      });
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       text: message,
@@ -161,7 +172,7 @@ export default function Chat() {
 
     try {
       const history = buildHistory([...messages, userMessage]);
-      const data = await postChat(history, userMessage.text);
+      const data = await postChat(session_id, history, userMessage.text);
 
       const aiText: string = data.answer ?? data.reply ?? data.text ?? "Sorry, I couldn't generate a reply.";
 
