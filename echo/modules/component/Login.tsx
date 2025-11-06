@@ -91,7 +91,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                 backgroundAttachment: 'fixed'
             }}
         >
-            <div className="mx-auto w-full max-w-md rounded-2xl border border-[#B7BCC9] bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8">
+            <div className="mx-auto w-full max-w-md rounded-sm border border-[#B7BCC9] bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8">
                 <TurretRoadFont />
                 <div className="mb-6 text-center">
                     <h1 style={{ fontFamily: "'Turret Road', cursive" }} className="text-2xl font-bold text-[#3D2D4C] sm:text-3xl">
@@ -165,8 +165,9 @@ export default function Login({ redirectTo = "/" }: Props) {
                 </button>
 
                 <div className="text-center font-['Roboto'] text-xs text-[#3D2D4C] opacity-60">
-                    Demo: admin@example.com / password123
+                    Demos: admin@example.com / admin123<br/>trainer@example.com / trainer123
                 </div>
+                
 
                 <div className="text-center font-['Roboto'] text-xs text-[#3D2D4C] opacity-50">
                     By continuing, you agree to our Terms & Privacy.
