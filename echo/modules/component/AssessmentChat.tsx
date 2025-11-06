@@ -306,26 +306,13 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
     try {
       const currentQuestion = assessment.questions[assessment.currentQuestionIndex];
 
-      // Evaluate the answer
-      const evalResponse = await fetch("/api/evaluate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: currentQuestion.question_text,
-          userAnswer: userMessage.text,
-          context: currentQuestion.context || [],
-        }),
-      });
-      const evalData = await evalResponse.json();
-
-      // Store the answer with context and evaluation
+      // Store the answer with context
       const newAnsweredQuestions = [
         ...assessment.answeredQuestions,
         {
           question: currentQuestion.question_text,
           answer: userMessage.text,
           questionId: currentQuestion.id,
-          isGoodAnswer: evalData.isGoodAnswer,
         },
       ];
 
@@ -344,30 +331,19 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
 
       // Check if we've reached the total questions limit
       if (newAnsweredQuestions.length >= assessment.totalQuestions) {
-        // Calculate the score
-        const correctAnswers = newAnsweredQuestions.filter(q => q.isGoodAnswer).length;
-        const score = Math.round((correctAnswers / assessment.totalQuestions) * 100);
-
-        // Update the score in the database
-        await fetch("/api/score", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ session_id, score }),
-        });
-
         // Generate final feedback
         const feedbackResponse = await fetch("/api/assessment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: "finish",
+            session_id,
             history: messages
               .filter((m) => m.isQuestion || m.sender === "user")
               .map((m) => ({
                 role: m.isQuestion ? "assistant" : "user",
                 content: m.text,
               })),
-            session_id, // Pass session_id for finish action
           }),
         });
 

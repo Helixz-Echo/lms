@@ -1,6 +1,6 @@
-// lib/state.supabase.ts
-import { supabaseAdmin } from "@/lib/supabase";
-import type { Question } from "@/lib/types";
+// lib/database/state.ts
+import { supabaseAdmin } from "@/lib/database/supabase";
+import type { Question } from "@/lib/assessment/types";
 
 export type SessionState = {
     id: string;

@@ -1,5 +1,5 @@
-// lib/tracks.supabase.ts
-import { supabaseAdmin } from "@/lib/supabase";
+// lib/database/tracks.ts
+import { supabaseAdmin } from "@/lib/database/supabase";
 
 export async function ensureDefaultTrack() {
     // Check if default track already exists

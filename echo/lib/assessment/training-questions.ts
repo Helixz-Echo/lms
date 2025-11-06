@@ -1,8 +1,8 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { retrieveContext } from "@/lib/retriever";
-import { supabaseAdmin } from "./supabase";
+import { retrieveContext } from "@/lib/ai/retriever";
+import { supabaseAdmin } from "@/lib/database/supabase";
 
 const llm = new ChatOpenAI({
     model: process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001",
@@ -175,27 +175,4 @@ export async function generateFinalFeedback(conversationHistory: any[]): Promise
     const feedback = await chain.invoke(prompt);
 
     return feedback.trim();
-}
-
-export async function evaluateAnswer(question: string, userAnswer: string, context: string[]): Promise<{
-    evaluation: string;
-    isGoodAnswer: boolean;
-}> {
-    const contextText = context.join("\n\n");
-    
-    const evaluationPrompt = `You are evaluating a student's answer to a training question.\n\nQuestion: ${question}\n\nStudent's Answer: ${userAnswer}\n\nReference Context:\n${contextText}\n\nProvide:\n1. Brief evaluation of the answer (2-3 sentences)\n2. Whether the answer demonstrates understanding (yes/no)\n\nBe constructive and encouraging. Format: First the evaluation, then on a new line: "Understanding: yes" or "Understanding: no"`;
-
-    const chain = RunnableSequence.from([
-        llm,
-        new StringOutputParser(),
-    ]);
-
-    const result = await chain.invoke(evaluationPrompt);
-    
-    const isGoodAnswer = result.toLowerCase().includes("understanding: yes");
-    
-    return {
-        evaluation: result.split('\n').slice(0, -1).join('\n').trim(),
-        isGoodAnswer
-    };
 }

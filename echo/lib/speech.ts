@@ -3,7 +3,7 @@
  * Handles Text-to-Speech (TTS) and Speech-to-Text (STT) functionality
  */
 
-import { trainingConfig } from "./config";
+import { trainingConfig } from "@/config/speech";
 
 // =============================================================================
 // BROWSER SUPPORT DETECTION
