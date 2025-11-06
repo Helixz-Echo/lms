@@ -25,7 +25,7 @@ export async function gradeAnswer({ question, userText }: { question: Question; 
     // Pull KB snippets to ground hints (non-fatal if retriever fails)
     let snippets: { id: string; text: string }[] = [];
     try {
-        const ctx = await retrieveContext(question.text, 4);
+        const ctx = await retrieveContext(question.text, 6);
         snippets = ctx?.map((c: any) => ({ id: c.id || c.chunk_id || "doc", text: c.text || c.content })) || [];
     } catch {}
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateQuestionFromKnowledge, generateFinalFeedback, evaluateAnswer, generateAndSaveAssessmentQuestions } from '@/lib/training-questions';
+import { generateFinalFeedback, generateAndSaveAssessmentQuestions } from '@/lib/training-questions';
 import { supabaseAdmin } from "@/lib/supabase";
 
 export const runtime = 'nodejs';
@@ -34,20 +34,6 @@ export async function POST(req: NextRequest) {
         });
       }
       
-      case 'evaluate': {
-        // Evaluate user's answer
-        const { question, answer, context, questionId } = body;
-        if (!question || !answer || !questionId) {
-          return NextResponse.json(
-            { error: 'Question, answer, and questionId are required' },
-            { status: 400 }
-          );
-        }
-        
-        const evaluation = await evaluateAnswer(question, answer, context || []);
-        return NextResponse.json(evaluation);
-      }
-      
       case 'finish': {
         // Generate final feedback
         const history = body.history || [];
@@ -67,7 +53,7 @@ export async function POST(req: NextRequest) {
       
       default:
         return NextResponse.json(
-          { error: 'Invalid action. Use: start, evaluate, or finish' },
+          { error: 'Invalid action. Use: start or finish' },
           { status: 400 }
         );
     }
