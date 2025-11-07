@@ -1,50 +1,54 @@
 "use client"
 
-import { LayoutGrid, BookOpen, HelpCircle, MessageSquare, Clock, User, Settings, LogOut, ClipboardCheck } from "lucide-react"
+import { LayoutGrid, BookOpen, User, Settings, LogOut } from "lucide-react"
 import { useEffect, useState } from "react"
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation"
+import Image from 'next/image'
+import logo from './logo.png';
 
 export default function AdminSidebar() {
-    const router = useRouter();
-    
+    const router = useRouter()
+    const [isHovered, setIsHovered] = useState(false)
+    const [loaded, setLoaded] = useState(false)
+
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true, path: "/dashboard/admin" },
         { icon: BookOpen, label: "File Upload", path: "/dashboard/admin/upload" },
-        { icon: ClipboardCheck, label: "Assessment", path: "/dashboard/admin?view=assessment" },
-        { icon: HelpCircle, label: "Resources" },
-        { icon: MessageSquare, label: "Discussion" },
-        { icon: Clock, label: "Schedules" },
         { icon: User, label: "My Account" },
         { icon: Settings, label: "Settings" },
     ]
 
-    // Animation trigger on mount safely
-    const [loaded, setLoaded] = useState(false)
     useEffect(() => {
-        const timeout = setTimeout(() => setLoaded(true), 50) // small delay avoids sync setState
+        const timeout = setTimeout(() => setLoaded(true), 50)
         return () => clearTimeout(timeout)
     }, [])
 
     return (
         <aside
-            className={`w-52 flex flex-col text-white transform transition-all duration-500 ${
+            className={`flex flex-col text-white transition-all duration-300 ${
                 loaded ? "translate-x-0 opacity-100" : "-translate-x-20 opacity-0"
-            }`}
-            style={{ background: "linear-gradient(to bottom, #7B93DB, #9DB3E8)" }}
+            } ${isHovered ? "w-52" : "w-20"}`}
+            style={{ background: '#181818' }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
+            {/* Compact Logo */}
+            <div className="border-b border-white/6 flex items-center justify-center h-20">
+                <Image src={logo} alt="Echo Logo" width={48} height={48} className="object-contain" priority />
+            </div>
 
-            <div className="p-6 border-b border-white/30">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center font-bold text-white animate-bounce">
-                        AI
-                    </div>
-                    <div>
-                        <div className="font-bold text-white">AI</div>
-                        <div className="text-xs uppercase tracking-wide text-white/80">Dashboard</div>
-                    </div>
+            {/* User Section */}
+            <div className="flex flex-col items-center gap-2 py-4 border-b border-white/6">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-r from-[#FFD7A3] to-[#A3C7FF]">
+                    <User className="w-7 h-7 text-[#181818]" />
+                </div>
+                <div className={`text-center transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className="text-sm font-semibold">Admin</div>
+                    <div className="text-xs text-white/70">Administrator</div>
                 </div>
             </div>
 
+            {/* Navigation Menu */}
             <nav className="flex-1 p-4 space-y-2">
                 {menuItems.map((item, index) => {
                     const Icon = item.icon
@@ -54,22 +58,33 @@ export default function AdminSidebar() {
                             onClick={() => item.path && router.push(item.path)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 transform ${
                                 item.active
-                                    ? "bg-white/20 text-white scale-105 shadow-md"
-                                    : "hover:bg-white/10 hover:scale-105 text-white/90"
+                                    ? "bg-gradient-to-r from-white/5 to-white/10 text-white scale-105 shadow-md"
+                                    : "text-white/80 hover:scale-105 hover:shadow-md hover:text-white hover:bg-gradient-to-r hover:from-white/5 hover:to-white/10"
                             }`}
-                            style={{ transitionDelay: `${index * 100}ms` }}
+                            style={{ transitionDelay: `${index * 50}ms` }}
                         >
-                            <Icon className="w-5 h-5" />
-                            <span className="text-sm font-medium">{item.label}</span>
+                            <Icon className="w-5 h-5 flex-shrink-0 text-white/90" />
+
+                            <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isHovered ? "w-auto opacity-100" : "w-0 opacity-0"}`}>
+                                {item.label}
+                            </span>
                         </div>
+
+
                     )
                 })}
             </nav>
 
-            <div className="p-4 border-t border-white/30">
-                <div className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-300 hover:bg-white/10 rounded-lg">
-                    <LogOut className="w-5 h-5" />
-                    <span className="text-sm font-medium" ><button onClick={() => router.push("/")}>Log Out</button></span>
+            {/* Logout Section */}
+            <div className="border-t border-white/6 mb-5">
+                <div
+                    className="flex items-center gap-3 px-3 py-3 cursor-pointer transition-all duration-300 rounded-lg hover:bg-gradient-to-r hover:from-white/5 hover:to-white/10"
+                    onClick={() => router.push("/")}
+                >
+                    <LogOut className="w-5 h-5 flex-shrink-0 text-white/90" />
+                    <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isHovered ? "w-auto opacity-100 text-white" : "w-0 opacity-0"}`}>
+                        Log Out
+                    </span>
                 </div>
             </div>
         </aside>

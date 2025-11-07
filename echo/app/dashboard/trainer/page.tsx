@@ -27,14 +27,15 @@ export default async function TrainerDashboard({ searchParams }: { searchParams:
             <Sidebar />
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Header />
+
 
                 <main className="flex-1 overflow-auto bg-white p-8">
                     <div className="max-w-7xl mx-auto space-y-8">
 
-                        <div className="opacity-0 animate-fadeInSlide delay-100">
-                            <p className="text-sm text-blue-400 font-medium">Hi Tarun,</p>
-                            <h1 className="text-4xl font-bold text-blue-300">Welcome to Sova!</h1>
+                        <div className="mb-8 animate-fadeIn">
+                            <p className="text-sm text-gray-600 font-medium">Hi Yuwen,</p>
+                            <h1 className="text-4xl font-bold text-gray-800">Welcome to Echo!</h1>
+                            <p className="text-gray-500 mt-1">Friday, November 7, 2025</p>
                         </div>
 
                         <div className="opacity-0 animate-fadeInSlide delay-200">

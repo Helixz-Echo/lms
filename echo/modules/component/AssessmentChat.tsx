@@ -404,7 +404,7 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
   };
 
   return (
-    <div className="flex h-screen bg-linear-to-br from-[#7B93DB] via-[#8DA8E3] to-[#9DB3E8]">
+      <div className="flex h-screen bg-gradient-to-br from-orange-500 via-blue-500 to-black">
       <main className="flex flex-1 flex-col">
         <header className="flex justify-between items-center gap-3 px-4 py-4 pt-16 md:px-8 md:py-8 md:pt-8 lg:px-12 lg:py-10 xl:px-16 xl:py-12">
           <div className="text-white font-['IBM_Plex_Mono'] text-lg font-bold">

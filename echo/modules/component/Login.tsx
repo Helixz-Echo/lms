@@ -2,16 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-
-// Import Turret Road font
-const TurretRoadFont = () => (
-    <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Turret+Road:wght@800&display=swap');
-    `}</style>
-);
+import bg from './Bg.png';
+const bgUrl = typeof bg === 'string' ? bg : bg.src;
 
 type Props = {
-    redirectTo?: string; // e.g. "/dashboard"
+    redirectTo?: string;
 };
 
 export default function Login({ redirectTo = "/" }: Props) {
@@ -44,7 +39,6 @@ export default function Login({ redirectTo = "/" }: Props) {
             const adminEmail = "admin@example.com";
             const adminPassword = "admin123";
 
-            // Local demo credential check — redirect immediately when matched
             if (email === trainerEmail && password === trainerPassword) {
                 router.push("/dashboard/trainer");
                 router.refresh();
@@ -55,7 +49,6 @@ export default function Login({ redirectTo = "/" }: Props) {
                 return;
             }
 
-            // Fallback to server authentication
             const res = await fetch("/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -81,99 +74,123 @@ export default function Login({ redirectTo = "/" }: Props) {
     }
 
     return (
-        <div 
-            className="fixed inset-0 w-full h-full flex items-center justify-center p-4"
+        <div
+            className="min-h-screen w-full flex items-center justify-center p-4"
             style={{
-                backgroundImage: "url('https://i.postimg.cc/vmx4Lq0w/bg1.jpg')",
+                backgroundImage: `url(${bgUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                backgroundAttachment: 'fixed'
+                backgroundRepeat: 'no-repeat'
             }}
         >
-            <div className="mx-auto w-full max-w-md rounded-sm border border-[#B7BCC9] bg-white p-6 shadow-[0_0_11px_0_rgba(128,139,157,0.15)] sm:p-8">
-                <TurretRoadFont />
-                <div className="mb-6 text-center">
-                    <h1 style={{ fontFamily: "'Turret Road', cursive" }} className="text-2xl font-bold text-[#3D2D4C] sm:text-3xl">
-                        Welcome to Echo GPT 
-                    </h1>
-                <p className="mt-2 font-['Roboto'] text-sm text-[#3D2D4C] opacity-70">
-                    Sign in to continue to your AI assistant
-                </p>
-            </div>
+            {/* Overlay for better contrast */}
+            <div className="absolute inset-0 bg-black/20"></div>
 
-            <form onSubmit={onSubmit} className="space-y-5">
-                <div>
-                    <label htmlFor="email" className="mb-2 block font-['Roboto'] text-sm font-medium text-[#3D2D4C]">
-                        Email Address
-                    </label>
-                    <input
-                        id="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#7B93DB] focus:ring-2 focus:ring-[#7B93DB] focus:ring-opacity-20"
-                        autoComplete="email"
-                        required
-                    />
-                </div>
+            {/* Login Card */}
+            <div className="relative z-10 mx-auto w-full max-w-md">
+                <div className="rounded-3xl border border-white/20 bg-white/95 backdrop-blur-xl p-8 shadow-2xl">
+                    <div className="mb-8 text-center">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            Welcome to EchoSphere
+                        </h1>
+                        <p className="text-sm text-gray-600">
+                            Sign in to continue to your AI assistant
+                        </p>
+                    </div>
 
-                <div>
-                    <label htmlFor="password" className="mb-2 block font-['Roboto'] text-sm font-medium text-[#3D2D4C]">
-                        Password
-                    </label>
-                    <div className="relative">
-                        <input
-                            id="password"
-                            type={showPw ? "text" : "password"}
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full rounded-xl border border-[#B7BCC9] px-4 py-3 pr-16 font-['Roboto'] text-[#3D2D4C] outline-none transition-colors focus:border-[#7B93DB] focus:ring-2 focus:ring-[#7B93DB] focus:ring-opacity-20"
-                            autoComplete="current-password"
-                            required
-                            minLength={6}
-                        />
+                    <form onSubmit={onSubmit} className="space-y-5">
+                        <div>
+                            <label
+                                htmlFor="email"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
+                                Email Address
+                            </label>
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder=""
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                autoComplete="email"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="password"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
+                                Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    type={showPw ? "text" : "password"}
+                                    placeholder=""
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pr-20 text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                    autoComplete="current-password"
+                                    required
+                                    minLength={6}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPw((s) => !s)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                                    aria-label={showPw ? "Hide password" : "Show password"}
+                                >
+                                    {showPw ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div
+                                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                                role="alert"
+                                aria-live="polite"
+                            >
+                                {error}
+                            </div>
+                        )}
+
                         <button
-                            type="button"
-                            onClick={() => setShowPw((s) => !s)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 font-['Roboto'] text-xs text-[#3D2D4C] opacity-70 transition-colors hover:bg-gray-100 hover:opacity-100"
-                            aria-label={showPw ? "Hide password" : "Show password"}
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3.5 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg"
                         >
-                            {showPw ? "Hide" : "Show"}
+                            {isSubmitting ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+                                    Signing in…
+                                </div>
+                            ) : (
+                                "Sign in"
+                            )}
                         </button>
-                    </div>
+
+                        <div className="space-y-2 pt-2">
+                            <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-center">
+                                <p className="text-xs font-medium text-blue-900 mb-1">Demo Accounts:</p>
+                                <p className="text-xs text-blue-700">
+                                    admin@example.com / admin123
+                                </p>
+                                <p className="text-xs text-blue-700">
+                                    trainer@example.com / trainer123
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="text-center text-xs text-gray-500">
+                            By continuing, you agree to our Terms & Privacy.
+                        </div>
+                    </form>
                 </div>
-
-                {error && (
-                    <div
-                        className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-['Roboto'] text-sm text-red-700"
-                        role="alert"
-                        aria-live="polite"
-                    >
-                        {error}
-                    </div>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-[#7B93DB] to-[#9DB3E6] px-4 py-3 font-['Roboto'] font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                    {isSubmitting ? "Signing in…" : "Sign in"}
-                </button>
-
-                <div className="text-center font-['Roboto'] text-xs text-[#3D2D4C] opacity-60">
-                    Demos: admin@example.com / admin123<br/>trainer@example.com / trainer123
-                </div>
-                
-
-                <div className="text-center font-['Roboto'] text-xs text-[#3D2D4C] opacity-50">
-                    By continuing, you agree to our Terms & Privacy.
-                </div>
-            </form>
-        </div>
+            </div>
         </div>
     );
 }

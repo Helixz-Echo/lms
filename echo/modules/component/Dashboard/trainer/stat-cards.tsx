@@ -1,47 +1,54 @@
+"use client"
+
+import React from "react"
 import { BookOpen, Target } from "lucide-react"
 
-export default function StatCards() {
-    const stats = [
+interface StatCardProps {
+    icon: React.ComponentType<any>
+    label: string
+    value: string | number
+    trend: string
+}
+
+export default function TrainerStatCards() {
+    const stats: StatCardProps[] = [
         {
             icon: BookOpen,
-            label: "Session Completed",
+            label: "Sessions Completed",
             value: "4",
             trend: "+25 min in last 7 days",
-            trendColor: "text-black-500",
         },
         {
             icon: Target,
             label: "Accuracy",
             value: "11.3%",
             trend: "+5.26% in last 7 days",
-            trendColor: "text-black-500",
+        },
+        {
+            icon: Target,
+            label: "Calls Accuracy",
+            value: "92%",
+            trend: "+3.5% in last 7 days",
         },
     ]
 
     return (
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
             {stats.map((stat, index) => {
                 const Icon = stat.icon
                 return (
                     <div
                         key={index}
-                        className={`rounded-lg p-6 shadow-md transform transition-all duration-500 hover:scale-105 hover:shadow-xl opacity-0 animate-fadeInUp`}
-                        style={{
-                            background: "linear-gradient(135deg, #7B93DB 0%, #9DB3E8 100%)",
-                            animationDelay: `${index * 150}ms`,
-                            animationFillMode: "forwards",
-                        }}
+                        className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
                     >
-                        <div className="flex items-start justify-between mb-4">
-                            <Icon
-                                className="w-6 h-6 text-white transition-transform duration-500 hover:scale-110"
-                            />
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="p-2 rounded-lg bg-blue-50">
+                                <Icon className="w-5 h-5 text-blue-600" />
+                            </div>
                         </div>
-                        <p className="text-white text-sm mb-1">{stat.label}</p>
-                        <h3 className="text-3xl font-bold text-white mb-3 transition-transform duration-500 hover:scale-105">
-                            {stat.value}
-                        </h3>
-                        <p className={`text-xs ${stat.trendColor} animate-pulse`}>{stat.trend}</p>
+                        <p className="text-xs text-gray-600 mb-1">{stat.label}</p>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-1">{stat.value}</h3>
+                        <p className="text-xs text-gray-500">{stat.trend}</p>
                     </div>
                 )
             })}
