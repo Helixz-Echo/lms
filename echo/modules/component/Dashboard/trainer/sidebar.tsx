@@ -24,7 +24,7 @@ export default function Sidebar() {
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true, href: "/dashboard/trainer" },
         { icon: BookOpen, label: "Course", href: "#" },
-        { icon: ClipboardCheck, label: "Assessment", href: "/dashboard/trainer?view=assessment" },
+
 
         { icon: User, label: "My Account", href: "#" },
         { icon: Settings, label: "Settings", href: "#" },
