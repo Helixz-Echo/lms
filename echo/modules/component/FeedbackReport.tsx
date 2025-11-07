@@ -6,7 +6,8 @@ import { X, CheckCircle, AlertCircle, TrendingUp, Book, MessageCircle } from "lu
 interface FeedbackReportProps {
   isOpen: boolean;
   onClose: () => void;
-  feedback: {
+  // allow feedback to be raw text or a structured object
+  feedback: string | {
     summary: string;
     strengths: string[];
     improvements: string[];
@@ -97,15 +98,15 @@ export default function FeedbackReport({
     };
   };
 
-  const parsed = typeof feedback === 'string' 
-    ? parseFeedback(feedback as any)
+  const parsed = typeof feedback === 'string'
+    ? parseFeedback(feedback)
     : feedback;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl animate-fadeIn">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-linear-to-r from-[#7B93DB] to-[#9DB3E8] px-6 py-4 text-white">
+        <div className="sticky top-0 z-10 bg-[#181818] px-6 py-4 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-['IBM_Plex_Mono'] text-2xl font-bold">Assessment Report</h2>
@@ -128,7 +129,7 @@ export default function FeedbackReport({
           {/* Questions and Answers Section */}
           {questionsData && questionsData.length > 0 && (
             <div className="space-y-4">
-              <h3 className="font-['IBM_Plex_Mono'] text-xl font-bold text-[#3D2D4C] mb-4">
+              <h3 className="font-['IBM_Plex_Mono'] text-xl font-bold text-[#181818] mb-4">
                 📝 Your Assessment Responses
               </h3>
               {questionsData.map((qa, index) => (
@@ -138,12 +139,12 @@ export default function FeedbackReport({
                       Q{index + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="font-['Roboto'] font-semibold text-[#3D2D4C] mb-2">
+                      <p className="font-['Roboto'] font-semibold text-[#181818] mb-2">
                         {qa.question}
                       </p>
-                      <div className="flex items-start gap-2 mt-3 pl-2 border-l-4 border-[#7B93DB]">
-                        <MessageCircle className="h-4 w-4 text-[#7B93DB] mt-1 shrink-0" />
-                        <p className="font-['Roboto'] text-[#3D2D4C]/80 italic">
+                      <div className="flex items-start gap-2 mt-3 pl-2 border-l-4 border-[#181818]">
+                        <MessageCircle className="h-4 w-4 text-[#181818] mt-1 shrink-0" />
+                        <p className="font-['Roboto'] text-[#181818]/80 italic">
                           {qa.answer}
                         </p>
                       </div>
@@ -160,16 +161,16 @@ export default function FeedbackReport({
           )}
 
           {/* Score/Summary Card */}
-          <div className="rounded-xl border-2 border-[#7B93DB]/20 bg-linear-to-br from-blue-50 to-indigo-50 p-6">
+          <div className="rounded-xl border-2 border-[#181818]/20 bg-[#181818]/10 p-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#7B93DB] text-white">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#181818] text-white">
                 <CheckCircle className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <h3 className="font-['IBM_Plex_Mono'] text-lg font-bold text-[#3D2D4C] mb-2">
+                <h3 className="font-['IBM_Plex_Mono'] text-lg font-bold text-[#181818] mb-2">
                   Overall Performance
                 </h3>
-                <p className="font-['Roboto'] text-[#3D2D4C]/80 leading-relaxed whitespace-pre-wrap">
+                <p className="font-['Roboto'] text-[#181818]/80 leading-relaxed whitespace-pre-wrap">
                   {parsed.summary}
                 </p>
               </div>
@@ -251,7 +252,7 @@ export default function FeedbackReport({
           {/* If feedback is just plain text without sections */}
           {!parsed.strengths?.length && !parsed.improvements?.length && !parsed.recommendations?.length && parsed.summary && (
             <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-6">
-              <div className="font-['Roboto'] text-[#3D2D4C] leading-relaxed whitespace-pre-wrap">
+              <div className="font-['Roboto'] text-[#181818] leading-relaxed whitespace-pre-wrap">
                 {parsed.summary}
               </div>
             </div>
@@ -262,20 +263,20 @@ export default function FeedbackReport({
             <>
               <div className="border-t-2 border-gray-200 my-6"></div>
               <div className="space-y-3">
-                <h3 className="font-['IBM_Plex_Mono'] text-xl font-bold text-[#3D2D4C] mb-4 flex items-center gap-2">
-                  <AlertCircle className="h-6 w-6 text-[#7B93DB]" />
+                <h3 className="font-['IBM_Plex_Mono'] text-xl font-bold text-[#181818] mb-4 flex items-center gap-2">
+                  <AlertCircle className="h-6 w-6 text-[#181818]" />
                   Detailed Question Feedback
                 </h3>
                 {parsed.questionAnalysis.map((analysis: string, idx: number) => {
                   const [qNum, ...rest] = analysis.split(':');
                   const feedback = rest.join(':').trim();
                   return (
-                    <div key={idx} className="rounded-xl border-2 border-indigo-200 bg-indigo-50 p-4">
+                    <div key={idx} className="rounded-xl border-2 border-[#181818]/20 bg-[#181818]/10 p-4">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white font-bold text-sm">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#181818] text-white font-bold text-sm">
                           {qNum}
                         </div>
-                        <p className="font-['Roboto'] text-indigo-900 leading-relaxed flex-1">
+                        <p className="font-['Roboto'] text-[#181818] leading-relaxed flex-1">
                           {feedback}
                         </p>
                       </div>
@@ -290,19 +291,19 @@ export default function FeedbackReport({
         {/* Footer */}
         <div className="sticky bottom-0 border-t border-gray-200 bg-white px-6 py-4">
           <div className="flex items-center justify-between gap-4">
-            <p className="font-['Roboto'] text-sm text-[#3D2D4C]/60">
+            <p className="font-['Roboto'] text-sm text-[#181818]/60">
               Review your performance and continue learning
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => window.print()}
-                className="rounded-xl border-2 border-[#7B93DB] px-6 py-2 font-['Roboto'] font-semibold text-[#7B93DB] transition-all hover:bg-[#7B93DB]/10"
+                className="rounded-xl border-2 border-[#181818] px-6 py-2 font-['Roboto'] font-semibold text-[#181818] transition-all hover:bg-[#181818]/10"
               >
                 Print Report
               </button>
               <button
                 onClick={onClose}
-                className="rounded-xl bg-linear-to-r from-[#7B93DB] to-[#9DB3E8] px-6 py-2 font-['Roboto'] font-semibold text-white shadow-lg transition-all hover:scale-105"
+                className="rounded-xl bg-[#181818] px-6 py-2 font-['Roboto'] font-semibold text-white shadow-lg transition-all hover:scale-105"
               >
                 Close
               </button>

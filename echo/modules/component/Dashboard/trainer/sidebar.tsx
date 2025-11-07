@@ -62,7 +62,7 @@ export default function Sidebar() {
                     <User className="w-7 h-7 text-[#181818]" />
                 </div>
                 <div className={`text-center transition-all ${isHovered ? "opacity-100" : "opacity-0"}`}>
-                    <div className="text-sm font-semibold">Traineer</div>
+                    <div className="text-sm font-semibold">Trainee</div>
                     <div className="text-xs text-white/70">Yuwen</div>
                 </div>
             </div>

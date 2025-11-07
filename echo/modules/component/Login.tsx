@@ -91,7 +91,7 @@ export default function Login({ redirectTo = "/" }: Props) {
                 <div className="rounded-3xl border border-white/20 bg-white/95 backdrop-blur-xl p-8 shadow-2xl">
                     <div className="mb-8 text-center">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                            Welcome to EchoSphere
+                            Welcome to Echo
                         </h1>
                         <p className="text-sm text-gray-600">
                             Sign in to continue to your AI assistant
