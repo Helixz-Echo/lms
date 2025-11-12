@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid,Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { LayoutGrid, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import FeedbackReport from "./FeedbackReport";
 import {
   speakAndListen,
@@ -120,9 +120,9 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
       }
     } else if (m.sender === "ai" && ttsEnabled && ttsSupported) {
       speak(
-          m.text,
-          () => setIsSpeaking(false),
-          () => setIsSpeaking(false)
+        m.text,
+        () => setIsSpeaking(false),
+        () => setIsSpeaking(false)
       );
       setIsSpeaking(true);
     }
@@ -252,7 +252,6 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
     };
 
     appendMessage(userMessage);
-    setMessage("");
     setIsLoading(true);
 
     try {
@@ -278,6 +277,25 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
         ],
       };
       setAssessmentData(newAssessmentData);
+      const feedbackResponse = await fetch("/api/assessment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "answer-feedback",
+          question: currentQuestion.question_text,
+          userAnswer: message,
+          session_id
+        }),
+      });
+
+      const feedbackData = await feedbackResponse.json();
+      setMessage("");
+      appendMessage({
+        id: (Date.now() + 2).toString(),
+        text: feedbackData.feedback || "Thanks for your answer!",
+        sender: "ai",
+        timestamp: new Date(),
+      });
 
       if (newAnsweredQuestions.length >= assessment.totalQuestions) {
         const feedbackResponse = await fetch("/api/assessment", {
@@ -287,11 +305,11 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
             action: "finish",
             session_id,
             history: messages
-                .filter((m) => m.isQuestion || m.sender === "user")
-                .map((m) => ({
-                  role: m.isQuestion ? "assistant" : "user",
-                  content: m.text,
-                })),
+              .filter((m) => m.isQuestion || m.sender === "user")
+              .map((m) => ({
+                role: m.isQuestion ? "assistant" : "user",
+                content: m.text,
+              })),
           }),
         });
 
@@ -347,197 +365,193 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
   };
 
   return (
-      <div className="flex h-screen bg-gradient-to-br from-orange-400 via-blue-300 to-black">
-        <main className="flex flex-1 flex-col">
-          <header className="relative px-4 py-4 pt-16 md:px-8 md:py-8 lg:px-12 lg:py-10 xl:px-16 xl:py-12">
-            {/* Dashboard button */}
-            <div className="absolute top-4 left-4 flex items-center gap-2">
-              <button
-                  onClick={() => router.push('/dashboard/trainer')}
-                  title="Go to Dashboard"
-                  aria-label="Go to dashboard"
-                  className="flex h-10 items-center gap-2 px-3 rounded-lg bg-white/10 text-white/90 backdrop-blur-sm transition-all hover:bg-white/20"
-              >
-                <LayoutGrid className="w-5 h-5" />
-                <span className="hidden sm:inline font-semibold">Dashboard</span>
-              </button>
-            </div>
+    <div className="flex h-screen bg-gradient-to-br from-orange-400 via-blue-300 to-black">
+      <main className="flex flex-1 flex-col">
+        <header className="relative px-4 py-4 pt-16 md:px-8 md:py-8 lg:px-12 lg:py-10 xl:px-16 xl:py-12">
+          {/* Dashboard button */}
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            <button
+              onClick={() => router.push('/dashboard/trainer')}
+              title="Go to Dashboard"
+              aria-label="Go to dashboard"
+              className="flex h-10 items-center gap-2 px-3 rounded-lg bg-white/10 text-white/90 backdrop-blur-sm transition-all hover:bg-white/20"
+            >
+              <LayoutGrid className="w-5 h-5" />
+              <span className="hidden sm:inline font-semibold">Dashboard</span>
+            </button>
+          </div>
 
-            {/* Question counter */}
-            {assessment.isActive && (
-                <div className="absolute top-4 right-4 text-white font-['IBM_Plex_Mono'] text-lg font-bold">
-                  Question {assessment.answeredQuestions.length + 1} of {assessment.totalQuestions}
-                </div>
+          {/* Question counter */}
+          {assessment.isActive && (
+            <div className="absolute top-4 right-4 text-white font-['IBM_Plex_Mono'] text-lg font-bold">
+              Question {assessment.answeredQuestions.length + 1} of {assessment.totalQuestions}
+            </div>
+          )}
+
+
+        </header>
+
+        <div className="flex flex-1 flex-col overflow-hidden px-4 pb-6 md:px-8 md:pb-8 lg:px-12 lg:pb-12 xl:px-20">
+          <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/20 bg-white/95 shadow-2xl backdrop-blur-sm">
+            {messages.length === 0 ? (
+              <AssessmentStart onStart={startAssessment} isLoading={isLoading} />
+            ) : (
+              <MessagesList messages={messages} isLoading={isLoading} />
             )}
 
+            {assessment.isActive && (
+              <div className="border-t border-gray-200 bg-white/80 p-4 md:p-6">
+                <div className="mx-auto w-full max-w-3xl">
+                  {/* STT/TTS Controls */}
+                  <div className="flex items-center justify-end gap-2 mb-3">
+                    {ttsSupported && (
+                      <button
+                        onClick={toggleTTS}
+                        title={ttsEnabled ? "Disable auto-speak" : "Enable auto-speak"}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${ttsEnabled
+                            ? "bg-green-100 text-green-600 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                          }`}
+                      >
+                        {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                      </button>
+                    )}
+                  </div>
 
-          </header>
-
-          <div className="flex flex-1 flex-col overflow-hidden px-4 pb-6 md:px-8 md:pb-8 lg:px-12 lg:pb-12 xl:px-20">
-            <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/20 bg-white/95 shadow-2xl backdrop-blur-sm">
-              {messages.length === 0 ? (
-                  <AssessmentStart onStart={startAssessment} isLoading={isLoading} />
-              ) : (
-                  <MessagesList messages={messages} isLoading={isLoading} />
-              )}
-
-              {assessment.isActive && (
-                  <div className="border-t border-gray-200 bg-white/80 p-4 md:p-6">
-                    <div className="mx-auto w-full max-w-3xl">
-                      {/* STT/TTS Controls */}
-                      <div className="flex items-center justify-end gap-2 mb-3">
-                        {ttsSupported && (
-                            <button
-                                onClick={toggleTTS}
-                                title={ttsEnabled ? "Disable auto-speak" : "Enable auto-speak"}
-                                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
-                                    ttsEnabled
-                                        ? "bg-green-100 text-green-600 hover:bg-green-200"
-                                        : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                                }`}
-                            >
-                              {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                            </button>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-[#7B93DB]/30 bg-white px-4 py-3 shadow-lg transition-all">
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            placeholder={isListening ? "Listening..." : "Type your answer or use voice..."}
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            disabled={isLoading || isListening}
-                            className="flex-1 bg-transparent font-['Roboto'] text-base text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C]/60 disabled:opacity-50 md:text-lg lg:text-xl"
-                        />
-                        <div className="flex items-center gap-2">
-                          {sttSupported && (
-                              <button
-                                  onClick={toggleListening}
-                                  disabled={isLoading}
-                                  title={isListening ? "Stop listening" : "Start voice input"}
-                                  className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                                      isListening
-                                          ? "bg-red-500 text-white animate-pulse hover:bg-red-600"
-                                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                  aria-label={isListening ? "Stop listening" : "Start voice input"}
-                              >
-                                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                              </button>
-                          )}
-                          <button
-                              onClick={handleSubmitAnswer}
-                              disabled={!message.trim() || isLoading}
-                              className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-900 to-gray-700 shadow-lg transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-label="Submit answer"
-                          >
-                            <span className="text-white text-xl">→</span>
-                          </button>
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between gap-3 rounded-2xl border-2 border-[#7B93DB]/30 bg-white px-4 py-3 shadow-lg transition-all">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      placeholder={isListening ? "Listening..." : "Type your answer or use voice..."}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      disabled={isLoading || isListening}
+                      className="flex-1 bg-transparent font-['Roboto'] text-base text-[#3D2D4C] outline-none placeholder:text-[#3D2D4C]/60 disabled:opacity-50 md:text-lg lg:text-xl"
+                    />
+                    <div className="flex items-center gap-2">
+                      {sttSupported && (
+                        <button
+                          onClick={toggleListening}
+                          disabled={isLoading}
+                          title={isListening ? "Stop listening" : "Start voice input"}
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${isListening
+                              ? "bg-red-500 text-white animate-pulse hover:bg-red-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          aria-label={isListening ? "Stop listening" : "Start voice input"}
+                        >
+                          {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                        </button>
+                      )}
+                      <button
+                        onClick={handleSubmitAnswer}
+                        disabled={!message.trim() || isLoading}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-r from-gray-900 to-gray-700 shadow-lg transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label="Submit answer"
+                      >
+                        <span className="text-white text-xl">→</span>
+                      </button>
                     </div>
                   </div>
-              )}
+                </div>
+              </div>
+            )}
 
-              <div ref={messagesEndRef} />
-            </div>
+            <div ref={messagesEndRef} />
           </div>
-        </main>
+        </div>
+      </main>
 
-        <FeedbackReport
-            isOpen={showFeedbackReport}
-            onClose={() => setShowFeedbackReport(false)}
-            feedback={finalFeedback as any}
-            questionsAnswered={assessment.answeredQuestions.length}
-            totalQuestions={assessment.totalQuestions}
-            questionsData={assessmentData.questions}
-        />
-      </div>
+      <FeedbackReport
+        isOpen={showFeedbackReport}
+        onClose={() => setShowFeedbackReport(false)}
+        feedback={finalFeedback as any}
+        questionsAnswered={assessment.answeredQuestions.length}
+        totalQuestions={assessment.totalQuestions}
+        questionsData={assessmentData.questions}
+      />
+    </div>
   );
 }
 
 function AssessmentStart({ onStart, isLoading }: { onStart: () => void; isLoading: boolean }) {
   return (
-      <div className="flex flex-1 items-center justify-center p-6 md:p-8 lg:p-12 xl:p-16">
-        <div className="flex w-full max-w-3xl flex-col items-center justify-center gap-6 md:gap-8 lg:gap-10">
-          <h2 className="font-['IBM_Plex_Mono'] text-center text-3xl font-bold leading-tight text-[#3D2D4C]">
-            Training Assessment
-          </h2>
-          <p className="text-center text-lg text-[#3D2D4C]/80 font-['Roboto']">
-            I'll ask you questions based on the knowledge base. Take your time and answer thoughtfully.
-            At the end, you'll receive comprehensive feedback on your performance.
-          </p>
-          <button
-              onClick={onStart}
-              disabled={isLoading}
-              className="rounded-xl bg-linear-to-r from-gray-900 to-gray-700 px-8 py-4 font-['Roboto'] text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? "Starting..." : "Start Assessment"}
-          </button>
-        </div>
+    <div className="flex flex-1 items-center justify-center p-6 md:p-8 lg:p-12 xl:p-16">
+      <div className="flex w-full max-w-3xl flex-col items-center justify-center gap-6 md:gap-8 lg:gap-10">
+        <h2 className="font-['IBM_Plex_Mono'] text-center text-3xl font-bold leading-tight text-[#3D2D4C]">
+          Training Assessment
+        </h2>
+        <p className="text-center text-lg text-[#3D2D4C]/80 font-['Roboto']">
+          I'll ask you questions based on the knowledge base. Take your time and answer thoughtfully.
+          At the end, you'll receive comprehensive feedback on your performance.
+        </p>
+        <button
+          onClick={onStart}
+          disabled={isLoading}
+          className="rounded-xl bg-linear-to-r from-gray-900 to-gray-700 px-8 py-4 font-['Roboto'] text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isLoading ? "Starting..." : "Start Assessment"}
+        </button>
       </div>
+    </div>
   );
 }
 
 function MessagesList({ messages, isLoading }: { messages: Message[]; isLoading: boolean }) {
   return (
-      <div className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6 lg:p-8">
-        <div className="mx-auto w-full max-w-3xl space-y-4">
-          {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`flex max-w-[85%] gap-3 ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                  <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                          msg.sender === "user"
-                              ? "bg-linear-to-r from-gray-900 to-gray-700"
-                              : msg.isQuestion
-                                  ? "bg-linear-to-r from-orange-500 to-red-500"
-                                  : "bg-linear-to-r from-purple-500 to-pink-500"
-                      } shadow-lg`}
-                  >
+    <div className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6 lg:p-8">
+      <div className="mx-auto w-full max-w-3xl space-y-4">
+        {messages.map((msg) => (
+          <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`flex max-w-[85%] gap-3 ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${msg.sender === "user"
+                    ? "bg-linear-to-r from-gray-900 to-gray-700"
+                    : msg.isQuestion
+                      ? "bg-linear-to-r from-orange-500 to-red-500"
+                      : "bg-linear-to-r from-purple-500 to-pink-500"
+                  } shadow-lg`}
+              >
                 <span className="text-xs font-bold text-white">
                   {msg.sender === "user" ? "YOU" : msg.isQuestion ? "Q" : "AI"}
                 </span>
-                  </div>
-                  <div
-                      className={`rounded-2xl px-4 py-3 shadow-md ${
-                          msg.sender === "user"
-                              ? "bg-linear-to-r from-gray-500 to-gray-600 text-white"
-                              : msg.isQuestion
-                                  ? "bg-orange-50 text-gray-800 border-2 border-orange-200"
-                                  : "bg-gray-100 text-gray-800"
-                      }`}
-                  >
-                    <p className="text-sm leading-relaxed md:text-base whitespace-pre-wrap">{msg.text}</p>
-                    <p className={`mt-1 text-xs ${msg.sender === "user" ? "text-white/70" : "text-gray-500"}`}>
-                      {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </p>
-                  </div>
-                </div>
               </div>
-          ))}
+              <div
+                className={`rounded-2xl px-4 py-3 shadow-md ${msg.sender === "user"
+                    ? "bg-linear-to-r from-gray-500 to-gray-600 text-white"
+                    : msg.isQuestion
+                      ? "bg-orange-50 text-gray-800 border-2 border-orange-200"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+              >
+                <p className="text-sm leading-relaxed md:text-base whitespace-pre-wrap">{msg.text}</p>
+                <p className={`mt-1 text-xs ${msg.sender === "user" ? "text-white/70" : "text-gray-500"}`}>
+                  {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
 
-          {isLoading && (
-              <div className="flex justify-start">
-                <div className="flex max-w-[85%] gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-purple-500 to-pink-500 shadow-lg">
-                    <span className="text-xs font-bold text-white">AI</span>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-2xl bg-gray-100 px-4 py-3 shadow-md">
-                    <div className="flex space-x-1">
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
-                      <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
-                    </div>
-                    <span className="text-sm text-gray-500">Thinking...</span>
-                  </div>
-                </div>
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="flex max-w-[85%] gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-purple-500 to-pink-500 shadow-lg">
+                <span className="text-xs font-bold text-white">AI</span>
               </div>
-          )}
-        </div>
+              <div className="flex items-center gap-2 rounded-2xl bg-gray-100 px-4 py-3 shadow-md">
+                <div className="flex space-x-1">
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
+                </div>
+                <span className="text-sm text-gray-500">Thinking...</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+    </div>
   );
 }

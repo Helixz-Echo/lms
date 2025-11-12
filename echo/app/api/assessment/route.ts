@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateFinalFeedback, generateAndSaveAssessmentQuestions } from '@/lib/assessment/training-questions';
-import { supabaseAdmin } from "@/lib/database/supabase";
+import { generateFinalFeedback, generateAndSaveAssessmentQuestions, generateAnswerFeedback } from '@/lib/assessment/training-questions';
 
 export const runtime = 'nodejs';
 
@@ -12,11 +11,11 @@ export async function POST(req: NextRequest) {
 
     if (!session_id) {
       return NextResponse.json(
-          { error: 'Session ID not provided' },
-          { status: 400 },
+        { error: 'Session ID not provided' },
+        { status: 400 },
       );
     }
-    
+
     switch (action) {
       case 'start': {
         const questions = await generateAndSaveAssessmentQuestions(session_id);
@@ -33,7 +32,22 @@ export async function POST(req: NextRequest) {
           message: "Welcome to your training assessment! I'll ask you a few questions based on the knowledge base. Take your time and answer thoughtfully."
         });
       }
-      
+
+      case 'answer-feedback': {
+        const { question, userAnswer } = body;
+        if (!question || !userAnswer) {
+          return NextResponse.json(
+            { error: 'Question and answer are required for feedback.' },
+            { status: 400 }
+          );
+        }
+        const feedback = await generateAnswerFeedback(question, userAnswer, session_id);
+        return NextResponse.json({
+          feedback : feedback.feedback,
+          message: "Assessment Complete! Here's your feedback:"
+        });
+      }
+
       case 'finish': {
         // Generate final feedback
         const history = body.history || [];
@@ -43,14 +57,14 @@ export async function POST(req: NextRequest) {
             { status: 400 }
           );
         }
-        
+
         const feedback = await generateFinalFeedback(history);
         return NextResponse.json({
           feedback,
           message: "Assessment Complete! Here's your feedback:"
         });
       }
-      
+
       default:
         return NextResponse.json(
           { error: 'Invalid action. Use: start or finish' },
