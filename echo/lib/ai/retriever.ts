@@ -1,6 +1,5 @@
 import { supabaseAdmin } from '@/lib/database/supabase';
 import { embed } from './embeddings';
-
 export async function retrieveContext(session_id: string, query: string, k: number = 6) {
     const queryEmbedding = await embed([query]);
 
@@ -31,3 +30,4 @@ export async function retrieveContext(session_id: string, query: string, k: numb
         throw error;
     }
 }
+

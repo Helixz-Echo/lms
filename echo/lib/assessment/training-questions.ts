@@ -66,10 +66,37 @@ Q[number]: [Brief evaluation of this specific answer - what was good, what could
 
 Be thorough, encouraging but honest. Provide specific examples from their answers. Make recommendations actionable and detailed.`;
 
+const ANSWER_FEEDBACK_PROMPT = `
+You are an encouraging AI training assistant evaluating a student's short answer.
+
+Question:
+"{question}"
+
+User's Answer:
+"{userAnswer}"
+
+Reference Knowledge (for correct answer):
+"{contextText}"
+
+Provide a short, conversational response (3–5 sentences max):
+- Naturally assess how accurate or complete the answer is.
+- If correct → praise and briefly add one helpful detail or insight.
+- If partially correct → acknowledge what’s right, gently clarify the missing piece.
+- If incorrect → gently correct and give a brief accurate explanation.
+- Always conclude with a friendly transition like:
+  "Let's move on to the next question!" or a similar motivating sentence.
+- Keep tone warm, natural, and easy to read.
+- No bullet points, no markdown, just plain text.
+`;
+
 export interface TrainingQuestion {
     id: string;
     question: string;
     context: string[];
+}
+
+export interface FeedbackResponse {
+    feedback: string;
 }
 
 export async function generateQuestionFromKnowledge(session_id: string, previousQuestions: string[] = []): Promise<TrainingQuestion> {
@@ -79,8 +106,8 @@ export async function generateQuestionFromKnowledge(session_id: string, previous
     if (randomChunkError || !randomChunk || randomChunk.length === 0) {
         console.error("Error getting random chunk:", randomChunkError);
         // Fallback to a generic query if a random chunk can't be retrieved
-        const searchQuery = previousQuestions.length > 0 
-            ? `training topic ${Math.random()}` 
+        const searchQuery = previousQuestions.length > 0
+            ? `training topic ${Math.random()}`
             : "training concepts";
         const context = await retrieveContext(session_id, searchQuery, 3);
         const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
@@ -101,11 +128,11 @@ export async function generateQuestionFromKnowledge(session_id: string, previous
     }
 
     const searchQuery = randomChunk[0].content;
-    
+
     const context = await retrieveContext(session_id, searchQuery, 3);
-    
+
     const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
-    
+
     const chain = RunnableSequence.from([
         llm,
         new StringOutputParser(),
@@ -175,4 +202,28 @@ export async function generateFinalFeedback(conversationHistory: any[]): Promise
     const feedback = await chain.invoke(prompt);
 
     return feedback.trim();
+}
+
+export async function generateAnswerFeedback(
+    question: string,
+    userAnswer: string,
+    session_id: string
+): Promise<FeedbackResponse> {
+    try {
+        const context = await retrieveContext(session_id, question, 3);
+        const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
+        const prompt = ANSWER_FEEDBACK_PROMPT
+            .replace("{question}", question)
+            .replace("{userAnswer}", userAnswer)
+            .replace("{contextText}", contextText)
+        const chain = RunnableSequence.from([llm, new StringOutputParser()]);
+        const feedback = await chain.invoke(prompt);
+        return { feedback: feedback.trim() };
+
+    } catch (error) {
+        console.error("Error generating feedback:", error);
+        return {
+            feedback: "Thanks for your answer! Let's move on to the next one.",
+        };
+    }
 }
