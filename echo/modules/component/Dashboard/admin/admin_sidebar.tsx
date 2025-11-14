@@ -14,7 +14,7 @@ export default function AdminSidebar() {
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true, path: "/dashboard/admin" },
         { icon: BookOpen, label: "File Upload", path: "/dashboard/admin/upload" },
-        { icon: User, label: "My Account" },
+        { icon: User, label: "Voice Analise", path: "/dashboard/admin/voice-analysis" },
         { icon: Settings, label: "Settings" },
     ]
 
