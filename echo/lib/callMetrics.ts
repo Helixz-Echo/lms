@@ -97,19 +97,50 @@ function pronunciationScore(words: Word[]): number {
 // Count fillers in text
 function countFillers(text: string): number {
     const tokens = text.split(/\s+/).filter(Boolean);
-    return tokens.filter(isFiller).length;
+    let fillerCount = 0;
+    for (let i = 0; i < tokens.length; i++) {
+        const isClassicFiller = isFiller(tokens[i]);
+        const isRepetition = i > 0 && normalizeToken(tokens[i]) === normalizeToken(tokens[i - 1]);
+
+        if (isClassicFiller || isRepetition) {
+            fillerCount++;
+        }
+    }
+    return fillerCount;
+}
+
+function mergeIntervals(intervals: [number, number][]): [number, number][] {
+    if (intervals.length === 0) return [];
+    intervals.sort((a, b) => a[0] - b[0]);
+    const merged = [intervals[0]];
+    for (let i = 1; i < intervals.length; i++) {
+        const current = intervals[i];
+        const last = merged[merged.length - 1];
+        if (current[0] <= last[1]) {
+            last[1] = Math.max(last[1], current[1]);
+        } else {
+            merged.push(current);
+        }
+    }
+    return merged;
 }
 
 // Total silence between all words
 function totalSilenceMs(allWords: Word[]): number {
     if (allWords.length < 2) return 0;
-    const sorted = [...allWords].sort((a, b) => a.start - b.start);
-    let silence = 0;
-    for (let i = 0; i < sorted.length - 1; i++) {
-        const gap = sorted[i + 1].start - sorted[i].end;
-        if (gap > 0) silence += gap;
-    }
-    return silence;
+
+    const callDuration = speakingWindowMs(allWords);
+    if (callDuration <= 0) return 0;
+
+    const speechIntervals = allWords.map((w) => [w.start, w.end] as [number, number]);
+    const mergedSpeechIntervals = mergeIntervals(speechIntervals);
+
+    const speechMs = mergedSpeechIntervals.reduce(
+        (total, interval) => total + (interval[1] - interval[0]),
+        0
+    );
+
+    return callDuration - speechMs;
 }
 
 // ------------- main function -------------

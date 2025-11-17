@@ -1,7 +1,9 @@
 // app/dashboard/admin/voice-analysis/page.tsx
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { GaugeCircle, Mic, MessageCircleWarning } from "lucide-react";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 
 // --- TYPES (from API and metrics files) ---
 
@@ -26,11 +28,23 @@ type CallMetrics = {
     overall: { totalSilenceSeconds: number; totalWords: number; };
 }
 
+type Transcript = {
+  text: string | null;
+  words: {
+    text: string;
+    start: number;
+    end: number;
+    confidence: number;
+    speaker: string | null;
+  }[];
+}
+
 type ApiResult = {
   message: string;
   filename: string;
   metrics?: CallMetrics;
   behaviorMetrics?: BehaviorMetrics;
+  transcript?: Transcript;
 };
 
 // --- MAIN PAGE COMPONENT ---
@@ -40,23 +54,26 @@ export default function VoiceAnalysisPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ApiResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   const handleFileChange = (selectedFile: File | null) => {
     if (selectedFile) {
         setFile(selectedFile);
         setResult(null);
         setError(null);
+        setShowTranscript(false);
     }
   };
 
   const handleUpload = async () => {
     if (!file) {
-      setError("Please select a .wav file first.");
+      setError("Please select an audio file first.");
       return;
     }
     setLoading(true);
     setError(null);
     setResult(null);
+    setShowTranscript(false);
     try {
       const formData = new FormData();
       formData.append("audio", file);
@@ -82,7 +99,7 @@ export default function VoiceAnalysisPage() {
             <FileUploader onFileSelected={handleFileChange} file={file} setFile={setFile} />
             <AnalysisButton onAnalyze={handleUpload} loading={loading} file={file} />
             <ErrorMessage error={error} />
-            {result && <ResultsDisplay result={result} />}
+            {result && <ResultsDisplay result={result} showTranscript={showTranscript} setShowTranscript={setShowTranscript} />}
         </div>
       </main>
   );
@@ -108,7 +125,7 @@ const FileUploader = ({ onFileSelected, file, setFile }: { onFileSelected: (file
 
     return (
         <div className="w-full p-6 border-2 border-dashed border-gray-300 rounded-xl bg-white text-center transition-colors duration-300 hover:border-blue-400 hover:bg-blue-50">
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".wav,audio/wav" className="hidden" />
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="audio/*" className="hidden" />
             <div className="flex flex-col items-center justify-center">
                 <UploadCloudIcon />
                 {file ? (
@@ -120,9 +137,9 @@ const FileUploader = ({ onFileSelected, file, setFile }: { onFileSelected: (file
                 ) : (
                     <>
                         <p className="mt-4 font-semibold text-gray-600">
-                            <button onClick={handleButtonClick} className="text-blue-600 hover:underline focus:outline-none">Click to select</button> a .wav file
+                            <button onClick={handleButtonClick} className="text-blue-600 hover:underline focus:outline-none">Click to select</button> an audio file
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">WAV format only</p>
+                        <p className="text-xs text-gray-400 mt-1">Any audio format</p>
                     </>
                 )}
             </div>
@@ -131,9 +148,41 @@ const FileUploader = ({ onFileSelected, file, setFile }: { onFileSelected: (file
 };
 
 const AnalysisButton = ({ onAnalyze, loading, file }: { onAnalyze: () => void, loading: boolean, file: File | null }) => (
-    <div className="mt-6 text-center">
-        <button onClick={onAnalyze} disabled={!file || loading} className="w-full max-w-md px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-            {loading ? "Analyzing..." : "Analyze Call"}
+    <div className="mt-6 flex justify-end">
+        <button
+            onClick={onAnalyze}
+            disabled={!file || loading}
+            className="w-1/3 px-6 py-3 text-base font-semibold text-white bg-blue-600 rounded-lg
+                       hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed
+                       transition-all duration-300 flex items-center justify-center"
+        >
+            {loading ? (
+                <span className="flex items-center justify-center">
+                    <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                        ></circle>
+                        <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                    </svg>
+                    Analyzing...
+                </span>
+            ) : (
+                "Analyze Call"
+            )}
         </button>
     </div>
 );
@@ -146,23 +195,105 @@ const ErrorMessage = ({ error }: { error: string | null }) => {
     </div>;
 };
 
-const ResultsDisplay = ({ result }: { result: ApiResult }) => (
+const ResultsDisplay = ({ result, showTranscript, setShowTranscript }: { result: ApiResult, showTranscript: boolean, setShowTranscript: (show: boolean) => void }) => (
     <section className="w-full mt-8 space-y-8">
-        {result.metrics && <QuantitativeAnalysis metrics={result.metrics} />}
-        {result.behaviorMetrics && <BehavioralAnalysis behaviorMetrics={result.behaviorMetrics} />}
+        <div className="flex justify-end">
+            <button
+                onClick={() => setShowTranscript(!showTranscript)}
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700"
+            >
+                {showTranscript ? "Hide" : "View"} Transcript
+            </button>
+        </div>
+        {showTranscript && result.transcript && <TranscriptView transcript={result.transcript} />}
+        {!showTranscript && (
+            <>
+                {result.metrics && <QuantitativeAnalysis metrics={result.metrics} />}
+                {result.behaviorMetrics && <BehavioralAnalysis behaviorMetrics={result.behaviorMetrics} />}
+            </>
+        )}
     </section>
 );
+
+const TranscriptView = ({ transcript }: { transcript: Transcript }) => {
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const messages: { speaker: string | null; text: string; startTime: number; endTime: number }[] = [];
+    let currentSpeaker: string | null = null;
+    let currentMessageText: string[] = [];
+    let currentMessageStartTime: number = 0;
+    let currentMessageEndTime: number = 0;
+
+    transcript.words.forEach((word, index) => {
+        if (word.speaker !== currentSpeaker) {
+            if (currentSpeaker !== null) {
+                messages.push({
+                    speaker: currentSpeaker,
+                    text: currentMessageText.join(' '),
+                    startTime: currentMessageStartTime,
+                    endTime: currentMessageEndTime,
+                });
+            }
+            currentSpeaker = word.speaker;
+            currentMessageText = [word.text];
+            currentMessageStartTime = word.start;
+            currentMessageEndTime = word.end;
+        } else {
+            currentMessageText.push(word.text);
+            currentMessageEndTime = word.end;
+        }
+
+        if (index === transcript.words.length - 1 && currentSpeaker !== null) {
+            messages.push({
+                speaker: currentSpeaker,
+                text: currentMessageText.join(' '),
+                startTime: currentMessageStartTime,
+                endTime: currentMessageEndTime,
+            });
+        }
+    });
+
+    return (
+        <div className="p-6 bg-white border rounded-xl shadow-sm">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Call Transcript</h2>
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4">
+                {messages.map((message, index) => (
+                    <div key={index} className={`flex gap-4 items-start ${message.speaker === 'A' ? 'justify-start' : 'justify-end'}`}>
+                        {message.speaker === 'A' && (
+                            <div className="flex-shrink-0 w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-semibold text-center">
+                                Agent
+                            </div>
+                        )}
+                        <div className={`max-w-xl p-4 rounded-lg ${message.speaker === 'A' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                            <p className="text-gray-800">{message.text}</p>
+                            <div className="text-xs text-gray-500 mt-2">
+                                {formatTime(message.startTime)} - {formatTime(message.endTime)}
+                            </div>
+                        </div>
+                        {message.speaker !== 'A' && (
+                            <div className="flex-shrink-0 w-16 h-16 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold text-center">
+                                Customer
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 const QuantitativeAnalysis = ({ metrics }: { metrics: CallMetrics }) => (
     <div className="p-6 bg-white border rounded-xl shadow-sm">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Quantitative Analysis</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <StatCard title="Agent WPM" value={metrics.agent.wpm.toFixed(0)} helpText="Words Per Minute" />
-            <StatCard title="Customer WPM" value={metrics.customer.wpm.toFixed(0)} helpText="Words Per Minute" />
-            <StatCard title="Agent Pronunciation" value={<Gauge value={metrics.agent.pronunciationScore} />} helpText="Average word confidence" />
-            <StatCard title="Agent Filler Words" value={metrics.agent.fillerCount} helpText="Count of words like 'um', 'uh'" />
-            <StatCard title="Customer Filler Words" value={metrics.customer.fillerCount} helpText="Count of words like 'um', 'uh'" />
-            <StatCard title="Total Silence" value={`${metrics.overall.totalSilenceSeconds.toFixed(1)}s`} helpText="Total duration of silence" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <StatCard title="Agent WPM" value={metrics.agent.wpm.toFixed(0)} helpText="Words Per Minute" icon={<GaugeCircle size={28} className="text-blue-500" />} />
+            <StatCard title="Customer WPM" value={metrics.customer.wpm.toFixed(0)} helpText="Words Per Minute" icon={<GaugeCircle size={28} className="text-purple-500" />} />
+            <StatCard title="Agent Pronunciation" value={<Gauge value={metrics.agent.pronunciationScore} />} helpText="Average word confidence" icon={<Mic size={28} className="text-green-500" />} />
+            <StatCard title="Agent Filler Words" value={metrics.agent.fillerCount} helpText="Count of words like 'um', 'uh'" icon={<MessageCircleWarning size={28} className="text-orange-500" />} />
         </div>
         <div className="mt-8">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Talk Ratio</h3>
@@ -171,9 +302,39 @@ const QuantitativeAnalysis = ({ metrics }: { metrics: CallMetrics }) => (
     </div>
 );
 
+const BehaviorRadarChart = ({ data }: { data: BehaviorMetrics }) => {
+    const chartData = [
+        { subject: 'Empathy', A: data.empathyLevel, fullMark: 1 },
+        { subject: 'Professionalism', A: data.professionalismCourtesy, fullMark: 1 },
+        { subject: 'De-escalation', A: data.conflictDeEscalation, fullMark: 1 },
+        { subject: 'Listening', A: data.activeListening, fullMark: 1 },
+        { subject: 'Consistency', A: data.toneConsistency, fullMark: 1 },
+        { subject: 'Problem Solving', A: data.problemSolvingLanguage, fullMark: 1 },
+        { subject: 'Clarity', A: data.speechPaceClarity, fullMark: 1 },
+        { subject: 'Personalization', A: data.personalizationVsScript, fullMark: 1 },
+    ];
+
+    return (
+        <ResponsiveContainer width="100%" height={400}>
+            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="subject" />
+                <PolarRadiusAxis angle={30} domain={[0, 1]} />
+                <Radar name="Agent Performance" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+            </RadarChart>
+        </ResponsiveContainer>
+    );
+};
+
 const BehavioralAnalysis = ({ behaviorMetrics: bm }: { behaviorMetrics: BehaviorMetrics }) => (
     <div className="p-6 bg-white border rounded-xl shadow-sm">
         <h2 className="text-xl font-bold text-gray-800 mb-6">Behavioral Analysis</h2>
+        
+        <div className="mb-8 border rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center">Performance Overview</h3>
+            <BehaviorRadarChart data={bm} />
+        </div>
+
         <div className="mb-8 p-6 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
             <h3 className="font-semibold text-blue-800 text-lg mb-2 flex items-center gap-2">
                 <InfoIcon />
@@ -197,24 +358,44 @@ const BehavioralAnalysis = ({ behaviorMetrics: bm }: { behaviorMetrics: Behavior
 
 // --- UI HELPER & CARD COMPONENTS ---
 
-const StatCard = ({ title, value, helpText }: { title: string, value: string | React.ReactNode, helpText: string }) => (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        <div className="text-3xl font-bold text-gray-800 mt-1">{value}</div>
-        <p className="text-xs text-gray-400 mt-1">{helpText}</p>
+const StatCard = ({ title, value, helpText, icon }: { title: string, value: string | React.ReactNode, helpText: string, icon?: React.ReactNode }) => (
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:border-blue-300">
+        {icon && <div className="p-3 bg-blue-100 rounded-full">{icon}</div>}
+        <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+            <div className="text-3xl font-bold text-gray-800 mt-1">{value}</div>
+            <p className="text-xs text-gray-400 mt-1">{helpText}</p>
+        </div>
     </div>
 );
 
+const BipolarBar = ({ value }: { value: number }) => {
+    let status: 'Positive' | 'Negative' | 'Neutral' = 'Neutral';
+    let color = 'text-gray-600 font-medium';
+
+    if (value > 0.1) {
+        status = 'Positive';
+        color = 'text-green-600 font-bold';
+    } else if (value < -0.1) {
+        status = 'Negative';
+        color = 'text-red-600 font-bold';
+    }
+
+    return (
+        <div className="text-left">
+            <span className={`text-lg ${color}`}>{status}</span>
+        </div>
+    );
+};
+
 const MetricCard = ({ title, value, description, scale }: { title: string, value: number, description?: string, scale?: string }) => {
     const isBipolar = scale === "-1 to +1";
-    const normalizedValue = isBipolar ? (value + 1) / 2 : value; // convert -1..+1 to 0..1
+    
+    const normalizedValue = isBipolar ? (value + 1) / 2 : value;
     const percentage = Math.max(0, Math.min(1, normalizedValue)) * 100;
     
     const getBarColor = () => {
-        if (isBipolar) {
-            return value > 0.2 ? 'bg-green-500' : value < -0.2 ? 'bg-red-500' : 'bg-yellow-500';
-        }
-        return percentage > 85 ? 'bg-green-500' : percentage > 60 ? 'bg-yellow-500' : 'bg-red-500';
+        return percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-400' : 'bg-red-600';
     };
 
     return (
@@ -223,9 +404,15 @@ const MetricCard = ({ title, value, description, scale }: { title: string, value
                 <h3 className="font-semibold text-base text-gray-800">{title}</h3>
                 <span className="text-xl font-bold text-gray-900">{value.toFixed(2)}</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div className={`${getBarColor()} h-2.5 rounded-full`} style={{ width: `${percentage}%` }}></div>
-            </div>
+            
+            {isBipolar ? (
+                <BipolarBar value={value} />
+            ) : (
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className={`${getBarColor()} h-2.5 rounded-full`} style={{ width: `${percentage}%` }}></div>
+                </div>
+            )}
+
             <p className="text-sm text-gray-600 mt-1">{description}</p>
         </div>
     );
@@ -244,20 +431,20 @@ const RatioBar = ({ agent, customer }: { agent: number, customer: number }) => {
     return (
         <div>
             <div className="w-full flex rounded-full h-8 bg-gray-200 overflow-hidden shadow-inner">
-                <div style={{ width: `${agentPct}%` }} className="bg-blue-500 flex items-center justify-center text-sm text-white font-bold">
+                <div style={{ width: `${agentPct}%` }} className="bg-blue-600 flex items-center justify-center text-sm text-white font-bold">
                     {agentPct.toFixed(0)}%
                 </div>
-                <div style={{ width: `${customerPct}%` }} className="bg-purple-500 flex items-center justify-center text-sm text-white font-bold">
+                <div style={{ width: `${customerPct}%` }} className="bg-blue-600 flex items-center justify-center text-sm text-white font-bold">
                     {customerPct.toFixed(0)}%
                 </div>
             </div>
             <div className="flex justify-between mt-2 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                    <span className="w-3 h-3 rounded-full bg-blue-600"></span>
                     <span>Agent</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-purple-500"></span>
+                    <span className="w-3 h-3 rounded-full bg-blue-600"></span>
                     <span>Customer</span>
                 </div>
             </div>

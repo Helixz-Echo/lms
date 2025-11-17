@@ -182,6 +182,7 @@ export async function POST(req: NextRequest) {
       filename: `analysis-${transcriptId}.json`,
       metrics,
       behaviorMetrics, // will be null if it failed
+      transcript: transcriptJson,
     });
   } catch (err: unknown) {
     console.error(err);

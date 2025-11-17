@@ -4,7 +4,7 @@ import { ChatOpenAI } from "@langchain/openai";
 const llm = new ChatOpenAI({
     model: process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001",
     apiKey: process.env.OPENROUTER_API_KEY,
-    temperature: 0.1,
+    temperature: 0,
     maxTokens: 1024,
     configuration: {
         baseURL: "https://openrouter.ai/api/v1",
@@ -65,9 +65,12 @@ export async function analyzeAgentBehaviorWithLLM(
     customerTranscript: string
 ): Promise<BehaviorMetrics> {
     const system = `
-You are a QA evaluator for a customer support call center.
-You receive the agent and customer text for one call.
-You MUST output JSON ONLY, no extra text, no markdown.
+You are a QA evaluator for a customer support call center. Your goal is to provide a consistent, objective, and deterministic evaluation.
+
+- Analyze the provided agent and customer transcripts.
+- Adhere strictly to the rating scales and definitions provided.
+- Avoid introducing any randomness, creativity, or subjective bias in your evaluation. Your output should be as repeatable as possible for the same input.
+- You MUST output JSON ONLY, no extra text, no markdown.
   `.trim();
 
     const user = `
