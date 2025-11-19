@@ -99,49 +99,28 @@ export interface FeedbackResponse {
     feedback: string;
 }
 
-export async function generateQuestionFromKnowledge(session_id: string, previousQuestions: string[] = []): Promise<TrainingQuestion> {
-    // Get a random chunk to use as a seed for the search query
+export async function generateQuestionFromKnowledge(
+    session_id: string,
+    previousQuestions: string[] = [],
+    language: string = "English"
+): Promise<TrainingQuestion> {
     const { data: randomChunk, error: randomChunkError } = await supabaseAdmin.rpc('get_random_chunk', { p_session_id: session_id });
 
-    if (randomChunkError || !randomChunk || randomChunk.length === 0) {
-        console.error("Error getting random chunk:", randomChunkError);
-        // Fallback to a generic query if a random chunk can't be retrieved
-        const searchQuery = previousQuestions.length > 0
-            ? `training topic ${Math.random()}`
-            : "training concepts";
-        const context = await retrieveContext(session_id, searchQuery, 3);
-        const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
-        const chain = RunnableSequence.from([
-            llm,
-            new StringOutputParser(),
-        ]);
-        const previousQuestionsText = previousQuestions.length > 0 ? previousQuestions.join("\n") : "None";
-        const prompt = QUESTION_GENERATOR_PROMPT
-            .replace("{context}", contextText)
-            .replace("{previous_questions}", previousQuestionsText);
-        const question = await chain.invoke(prompt);
-        return {
-            id: Date.now().toString(),
-            question: question.trim(),
-            context: context.map((c: any) => c.text || c.content)
-        };
+    let searchQuery = "training concepts";
+    if (!randomChunkError && randomChunk && randomChunk.length > 0) {
+        searchQuery = randomChunk[0].content;
     }
 
-    const searchQuery = randomChunk[0].content;
-
     const context = await retrieveContext(session_id, searchQuery, 3);
-
     const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
-
-    const chain = RunnableSequence.from([
-        llm,
-        new StringOutputParser(),
-    ]);
 
     const previousQuestionsText = previousQuestions.length > 0 ? previousQuestions.join("\n") : "None";
     const prompt = QUESTION_GENERATOR_PROMPT
         .replace("{context}", contextText)
-        .replace("{previous_questions}", previousQuestionsText);
+        .replace("{previous_questions}", previousQuestionsText) +
+        `\n\nRespond in ${language}.`;
+
+    const chain = RunnableSequence.from([llm, new StringOutputParser()]);
     const question = await chain.invoke(prompt);
 
     return {
@@ -151,79 +130,91 @@ export async function generateQuestionFromKnowledge(session_id: string, previous
     };
 }
 
-export async function generateAndSaveAssessmentQuestions(session_id: string, numberOfQuestions: number = 10): Promise<any[]> {
-    // First, check if questions already exist for this session
-    const { data: existingQuestions, error: existingError } = await supabaseAdmin
+
+export async function generateAndSaveAssessmentQuestions(
+    session_id: string,
+    numberOfQuestions: number = 10,
+    language: string = "English"
+): Promise<any[]> {
+
+     const { data: existingQuestions, error: existingError } = await supabaseAdmin
         .from('training_assessment_questions')
         .select('*')
-        .eq('session_id', session_id);
+        .eq('session_id', session_id)
+        .eq('language', language);
 
-    if (existingError) {
-        console.error("Error checking for existing questions:", existingError);
-        throw existingError;
-    }
+    if (existingError) throw existingError;
 
     if (existingQuestions && existingQuestions.length > 0) {
-        console.log("Retrieved existing questions:", existingQuestions);
         return existingQuestions;
     }
 
-    // If no questions exist, generate and save them
     const generatedQuestions: TrainingQuestion[] = [];
+
     for (let i = 0; i < numberOfQuestions; i++) {
-        const newQuestion = await generateQuestionFromKnowledge(session_id, generatedQuestions.map(q => q.question));
+        const newQuestion = await generateQuestionFromKnowledge(
+            session_id,
+            generatedQuestions.map(q => q.question),
+            language
+        );
         generatedQuestions.push(newQuestion);
     }
 
-    const questionsToInsert = generatedQuestions.map(q => ({ session_id: session_id, question_text: q.question }));
+    const questionsToInsert = generatedQuestions.map(q => ({
+        session_id: session_id,
+        question_text: q.question,
+        language: language
+    }));
 
-    const { data, error } = await supabaseAdmin.from('training_assessment_questions').insert(questionsToInsert).select();
+    const { data, error } = await supabaseAdmin
+        .from('training_assessment_questions')
+        .insert(questionsToInsert)
+        .select();
 
-    if (error || !data) {
-        console.error("Error saving questions to DB:", error);
-        throw error || new Error('Failed to save questions');
-    }
+    if (error || !data) throw error || new Error("Failed to save multilingual questions");
 
-    console.log("Generated and saved new questions:", data);
     return data;
 }
 
-export async function generateFinalFeedback(conversationHistory: any[]): Promise<string> {
+export async function generateFinalFeedback(
+    conversationHistory: any[],
+    language: string = "English"
+): Promise<string> {
     const historyText = conversationHistory
         .map(msg => `${msg.role === 'user' ? 'Student' : 'Question'}: ${msg.content}`)
         .join('\n\n');
 
-    const chain = RunnableSequence.from([
-        llm,
-        new StringOutputParser(),
-    ]);
+    const prompt = FEEDBACK_GENERATOR_PROMPT.replace("{history}", historyText) +
+        `\n\nRespond in ${language}.`;
 
-    const prompt = FEEDBACK_GENERATOR_PROMPT.replace("{history}", historyText);
+    const chain = RunnableSequence.from([llm, new StringOutputParser()]);
     const feedback = await chain.invoke(prompt);
 
     return feedback.trim();
 }
 
+
 export async function generateAnswerFeedback(
     question: string,
     userAnswer: string,
-    session_id: string
+    session_id: string,
+    language: string = "English"
 ): Promise<FeedbackResponse> {
     try {
         const context = await retrieveContext(session_id, question, 3);
         const contextText = context.map((c: any) => c.text || c.content).join("\n\n");
+
         const prompt = ANSWER_FEEDBACK_PROMPT
             .replace("{question}", question)
             .replace("{userAnswer}", userAnswer)
-            .replace("{contextText}", contextText)
+            .replace("{contextText}", contextText) +
+            `\n\nRespond in ${language}.`;
+
         const chain = RunnableSequence.from([llm, new StringOutputParser()]);
         const feedback = await chain.invoke(prompt);
         return { feedback: feedback.trim() };
-
     } catch (error) {
         console.error("Error generating feedback:", error);
-        return {
-            feedback: "Thanks for your answer! Let's move on to the next one.",
-        };
+        return { feedback: "Thanks for your answer! Let's move on to the next one." };
     }
 }
