@@ -41,6 +41,7 @@ interface AssessmentSession {
 
 export default function AssessmentChat({ session_id }: { session_id: string }) {
   const router = useRouter();
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -192,12 +193,13 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
   };
 
   const startAssessment = async () => {
+    if (!selectedLanguage) return;
     setIsLoading(true);
     try {
       const response = await fetch("/api/assessment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "start", session_id }),
+        body: JSON.stringify({ action: "start", session_id, language: selectedLanguage, }),
       });
       const data = await response.json();
 
@@ -284,7 +286,8 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
           action: "answer-feedback",
           question: currentQuestion.question_text,
           userAnswer: message,
-          session_id
+          session_id,
+          language: selectedLanguage,
         }),
       });
 
@@ -304,6 +307,7 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
           body: JSON.stringify({
             action: "finish",
             session_id,
+            language: selectedLanguage,
             history: messages
               .filter((m) => m.isQuestion || m.sender === "user")
               .map((m) => ({
@@ -394,7 +398,12 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
         <div className="flex flex-1 flex-col overflow-hidden px-4 pb-6 md:px-8 md:pb-8 lg:px-12 lg:pb-12 xl:px-20">
           <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/20 bg-white/95 shadow-2xl backdrop-blur-sm">
             {messages.length === 0 ? (
-              <AssessmentStart onStart={startAssessment} isLoading={isLoading} />
+              <AssessmentStart
+                onStart={startAssessment}
+                isLoading={isLoading}
+                selectedLanguage={selectedLanguage}
+                setSelectedLanguage={setSelectedLanguage}
+              />
             ) : (
               <MessagesList messages={messages} isLoading={isLoading} />
             )}
@@ -409,8 +418,8 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
                         onClick={toggleTTS}
                         title={ttsEnabled ? "Disable auto-speak" : "Enable auto-speak"}
                         className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${ttsEnabled
-                            ? "bg-green-100 text-green-600 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                          ? "bg-green-100 text-green-600 hover:bg-green-200"
+                          : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                           }`}
                       >
                         {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -436,8 +445,8 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
                           disabled={isLoading}
                           title={isListening ? "Stop listening" : "Start voice input"}
                           className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${isListening
-                              ? "bg-red-500 text-white animate-pulse hover:bg-red-600"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            ? "bg-red-500 text-white animate-pulse hover:bg-red-600"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           aria-label={isListening ? "Stop listening" : "Start voice input"}
                         >
@@ -475,7 +484,17 @@ export default function AssessmentChat({ session_id }: { session_id: string }) {
   );
 }
 
-function AssessmentStart({ onStart, isLoading }: { onStart: () => void; isLoading: boolean }) {
+function AssessmentStart({
+  onStart,
+  isLoading,
+  selectedLanguage,
+  setSelectedLanguage,
+}: {
+  onStart: () => void;
+  isLoading: boolean;
+  selectedLanguage: string | null;
+  setSelectedLanguage: (lang: string) => void;
+}) {
   return (
     <div className="flex flex-1 items-center justify-center p-6 md:p-8 lg:p-12 xl:p-16">
       <div className="flex w-full max-w-3xl flex-col items-center justify-center gap-6 md:gap-8 lg:gap-10">
@@ -483,13 +502,30 @@ function AssessmentStart({ onStart, isLoading }: { onStart: () => void; isLoadin
           Training Assessment
         </h2>
         <p className="text-center text-lg text-[#3D2D4C]/80 font-['Roboto']">
-          I'll ask you questions based on the knowledge base. Take your time and answer thoughtfully.
-          At the end, you'll receive comprehensive feedback on your performance.
+          Select your language first. Then, answer questions thoughtfully.
         </p>
+
+        {/* Language Selection */}
+        <div className="flex gap-4">
+          {["English", "Sinhala", "Tamil"].map((lang) => (
+            <button
+              key={lang}
+              onClick={() => setSelectedLanguage(lang)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${selectedLanguage === lang
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+            >
+              {lang}
+            </button>
+          ))}
+        </div>
+
+        {/* Start Assessment Button */}
         <button
           onClick={onStart}
-          disabled={isLoading}
-          className="rounded-xl bg-linear-to-r from-gray-900 to-gray-700 px-8 py-4 font-['Roboto'] text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isLoading || !selectedLanguage} // disable if no language selected
+          className={`rounded-xl bg-linear-to-r from-gray-900 to-gray-700 px-8 py-4 font-['Roboto'] text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50`}
         >
           {isLoading ? "Starting..." : "Start Assessment"}
         </button>
@@ -497,6 +533,7 @@ function AssessmentStart({ onStart, isLoading }: { onStart: () => void; isLoadin
     </div>
   );
 }
+
 
 function MessagesList({ messages, isLoading }: { messages: Message[]; isLoading: boolean }) {
   return (
@@ -507,10 +544,10 @@ function MessagesList({ messages, isLoading }: { messages: Message[]; isLoading:
             <div className={`flex max-w-[85%] gap-3 ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
               <div
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${msg.sender === "user"
-                    ? "bg-linear-to-r from-gray-900 to-gray-700"
-                    : msg.isQuestion
-                      ? "bg-linear-to-r from-orange-500 to-red-500"
-                      : "bg-linear-to-r from-purple-500 to-pink-500"
+                  ? "bg-linear-to-r from-gray-900 to-gray-700"
+                  : msg.isQuestion
+                    ? "bg-linear-to-r from-orange-500 to-red-500"
+                    : "bg-linear-to-r from-purple-500 to-pink-500"
                   } shadow-lg`}
               >
                 <span className="text-xs font-bold text-white">
@@ -519,10 +556,10 @@ function MessagesList({ messages, isLoading }: { messages: Message[]; isLoading:
               </div>
               <div
                 className={`rounded-2xl px-4 py-3 shadow-md ${msg.sender === "user"
-                    ? "bg-linear-to-r from-gray-500 to-gray-600 text-white"
-                    : msg.isQuestion
-                      ? "bg-orange-50 text-gray-800 border-2 border-orange-200"
-                      : "bg-gray-100 text-gray-800"
+                  ? "bg-linear-to-r from-gray-500 to-gray-600 text-white"
+                  : msg.isQuestion
+                    ? "bg-orange-50 text-gray-800 border-2 border-orange-200"
+                    : "bg-gray-100 text-gray-800"
                   }`}
               >
                 <p className="text-sm leading-relaxed md:text-base whitespace-pre-wrap">{msg.text}</p>

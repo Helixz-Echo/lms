@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const action = body.action; // 'start', 'next', 'evaluate', 'finish'
     const session_id: string | undefined = body.session_id;
+    const language: string | undefined = body.language;
 
     if (!session_id) {
       return NextResponse.json(
@@ -16,9 +17,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log(language);
+    
+
     switch (action) {
       case 'start': {
-        const questions = await generateAndSaveAssessmentQuestions(session_id);
+        const questions = await generateAndSaveAssessmentQuestions(session_id,10, language);
 
         if (!questions || questions.length === 0) {
           return NextResponse.json(
@@ -29,7 +33,11 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
           questions: questions,
-          message: "Welcome to your training assessment! I'll ask you a few questions based on the knowledge base. Take your time and answer thoughtfully."
+          message: language === 'Sinhala'
+            ? "ඔබේ පුහුණු ඇගැයුමට සාදරයෙන් පිළිගනිමු! ..."
+            : language === 'Tamil'
+              ? "உங்கள் பயிற்சி மதிப்பீட்டிற்கு வரவேற்கிறோம்! ..."
+              : "Welcome to your training assessment! I'll ask you a few questions based on the knowledge base. Take your time and answer thoughtfully."
         });
       }
 
@@ -41,9 +49,9 @@ export async function POST(req: NextRequest) {
             { status: 400 }
           );
         }
-        const feedback = await generateAnswerFeedback(question, userAnswer, session_id);
+        const feedback = await generateAnswerFeedback(question, userAnswer, session_id, language);
         return NextResponse.json({
-          feedback : feedback.feedback,
+          feedback: feedback.feedback,
           message: "Assessment Complete! Here's your feedback:"
         });
       }
@@ -58,7 +66,7 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        const feedback = await generateFinalFeedback(history);
+        const feedback = await generateFinalFeedback(history, language);
         return NextResponse.json({
           feedback,
           message: "Assessment Complete! Here's your feedback:"
