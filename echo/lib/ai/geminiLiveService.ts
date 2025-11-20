@@ -99,7 +99,7 @@ async function generateConversationSummary(messages: Message[]): Promise<string>
                 thinkingConfig: { thinkingBudget: 100 }, // Reserve tokens for thinking
             },
         });
-        return response.text.trim();
+        return response.text?.trim() || "Failed to generate summary: empty response.";
     } catch (error) {
         console.error("Error generating conversation summary:", error);
         return "Failed to generate summary due to an API error.";
@@ -160,7 +160,7 @@ export async function connectLiveSession(callbacks: LiveSessionCallbacks): Promi
             // No explicit state change for input transcription, remains LISTENING or SPEAKING based on model's turn.
           }
 
-          const base64EncodedAudioString = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+          const base64EncodedAudioString = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
 
           // Handle interruption first, as it can stop current speaking
           if (message.serverContent?.interrupted) {
