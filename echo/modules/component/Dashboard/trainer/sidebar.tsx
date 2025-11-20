@@ -3,13 +3,10 @@
 import {
     LayoutGrid,
     BookOpen,
-    HelpCircle,
-    MessageSquare,
-    Clock,
     User,
     Settings,
     LogOut,
-    ClipboardCheck,
+    PhoneCall
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -24,8 +21,7 @@ export default function Sidebar() {
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true, href: "/dashboard/trainer" },
         { icon: BookOpen, label: "Course", href: "#" },
-
-
+        { icon: PhoneCall, label: "Call Agent", href: "/dashboard/call-agent" },
         { icon: User, label: "My Account", href: "#" },
         { icon: Settings, label: "Settings", href: "#" },
     ]
@@ -37,9 +33,8 @@ export default function Sidebar() {
 
     return (
         <aside
-            className={`flex flex-col text-white transition-all duration-300 ${
-                loaded ? "translate-x-0 opacity-100" : "-translate-x-20 opacity-0"
-            } ${isHovered ? "w-52" : "w-20"}`}
+            className={`flex flex-col text-white transition-all duration-300 ${loaded ? "translate-x-0 opacity-100" : "-translate-x-20 opacity-0"
+                } ${isHovered ? "w-52" : "w-20"}`}
             style={{ background: "#181818" }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -75,21 +70,19 @@ export default function Sidebar() {
                         <div
                             key={index}
                             onClick={() => item.href && router.push(item.href)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 transform ${
-                                item.active
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 transform ${item.active
                                     ? "bg-gradient-to-r from-white/5 to-white/10 text-white scale-105 shadow-md"
                                     : "text-white/80 hover:scale-105 hover:shadow-md hover:text-white hover:bg-gradient-to-r hover:from-white/5 hover:to-white/10"
-                            }`}
+                                }`}
                             style={{ transitionDelay: `${index * 50}ms` }}
                         >
                             <Icon className="w-5 h-5 flex-shrink-0 text-white/90" />
                             <span
-                                className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${
-                                    isHovered ? "w-auto opacity-100" : "w-0 opacity-0"
-                                }`}
+                                className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isHovered ? "w-auto opacity-100" : "w-0 opacity-0"
+                                    }`}
                             >
-                {item.label}
-              </span>
+                                {item.label}
+                            </span>
                         </div>
                     )
                 })}
@@ -103,12 +96,11 @@ export default function Sidebar() {
                 >
                     <LogOut className="w-5 h-5 flex-shrink-0 text-white/90" />
                     <span
-                        className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${
-                            isHovered ? "w-auto opacity-100 text-white" : "w-0 opacity-0"
-                        }`}
+                        className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isHovered ? "w-auto opacity-100 text-white" : "w-0 opacity-0"
+                            }`}
                     >
-            Log Out
-          </span>
+                        Log Out
+                    </span>
                 </div>
             </div>
         </aside>
