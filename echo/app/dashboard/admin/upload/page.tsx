@@ -16,7 +16,7 @@ export default function UploadPage() {
                     {/* General Documents */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
                         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">General Documents</h2>
-                        <p className="text-xs sm:text-sm text-gray-500 mb-4">Upload CSV files for knowledge base</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mb-4">Upload CSV files for Knowledge Base</p>
                         <Uploader/>
                     </div>
 

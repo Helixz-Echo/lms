@@ -142,9 +142,9 @@ const CallAgentClient: React.FC = () => {
   return (
     <div className="flex flex-col h-full w-full  bg-white overflow-hidden ">
       {/* Header */}
-      <div className=" bg-[#181818] p-4 text-white text-center">
+      <div className=" bg-[#231ad4] p-4 text-white text-center">
         <h1 className="text-3xl font-extrabold tracking-tight">
-          <span className="block">Call Center Agent</span>
+          <span className="block">Helixz Call Center Agent</span>
         </h1>
       </div>
 

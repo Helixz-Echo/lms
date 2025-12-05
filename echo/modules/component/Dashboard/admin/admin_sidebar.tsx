@@ -14,7 +14,7 @@ export default function AdminSidebar() {
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true, path: "/dashboard/admin" },
         { icon: BookOpen, label: "File Upload", path: "/dashboard/admin/upload" },
-        { icon: User, label: "Voice Analise", path: "/dashboard/admin/voice-analysis" },
+        { icon: User, label: "Sentiment Analytics", path: "/dashboard/admin/voice-analysis" },
         { icon: Settings, label: "Settings" },
     ]
 
@@ -27,7 +27,7 @@ export default function AdminSidebar() {
         <aside
             className={`flex flex-col text-white transition-all duration-300 ${
                 loaded ? "translate-x-0 opacity-100" : "-translate-x-20 opacity-0"
-            } ${isHovered ? "w-52" : "w-20"}`}
+            } ${isHovered ? "w-60" : "w-20"}`}
             style={{ background: '#181818' }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -43,7 +43,7 @@ export default function AdminSidebar() {
                     <User className="w-7 h-7 text-[#181818]" />
                 </div>
                 <div className={`text-center transition-all ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-                    <div className="text-sm font-semibold">Admin</div>
+                    <div className="text-sm font-semibold">Chamith</div>
                     <div className="text-xs text-white/70">Administrator</div>
                 </div>
             </div>

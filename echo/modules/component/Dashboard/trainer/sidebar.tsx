@@ -20,8 +20,8 @@ export default function Sidebar() {
 
     const menuItems = [
         { icon: LayoutGrid, label: "Dashboard", active: true, href: "/dashboard/trainer" },
-        { icon: BookOpen, label: "Course", href: "#" },
-        { icon: PhoneCall, label: "Call Agent", href: "/dashboard/call-agent" },
+        { icon: BookOpen, label: "Courses", href: "#" },
+        { icon: PhoneCall, label: "Call Support", href: "/dashboard/call-agent" },
         { icon: User, label: "My Account", href: "#" },
         { icon: Settings, label: "Settings", href: "#" },
     ]

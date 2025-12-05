@@ -34,7 +34,7 @@ export default async function TrainerDashboard({ searchParams }: { searchParams:
 
                         <div className="mb-8 animate-fadeIn">
                             <p className="text-sm text-gray-600 font-medium">Hi Yuwen,</p>
-                            <h1 className="text-4xl font-bold text-gray-800">Welcome to Echo!</h1>
+                            <h1 className="text-4xl font-bold text-gray-800">Welcome to Helixz Echo!</h1>
                             <p className="text-gray-500 mt-1">Friday, November 7, 2025</p>
                         </div>
 
