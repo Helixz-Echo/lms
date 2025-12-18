@@ -166,7 +166,7 @@ export default function TrainingSessionUploader() {
                                     </svg>
                                     Uploading...
                                 </span>
-                            ) : 'Upload to Session'}
+                            ) : 'Upload Session'}
                         </button>
                         <button
                             type="button"
@@ -182,7 +182,7 @@ export default function TrainingSessionUploader() {
                                     </svg>
                                     Clearing...
                                 </span>
-                            ) : 'Clear Previous Data'}
+                            ) : 'Delete'}
                         </button>
                     </div>
                 </form>

@@ -27,14 +27,14 @@ import {
 
 // ===== Demo Data =====
 const callVolumeData = [
-    { time: "9 AM", calls: 45, answered: 38, missed: 7 },
-    { time: "10 AM", calls: 62, answered: 55, missed: 7 },
-    { time: "11 AM", calls: 78, answered: 71, missed: 7 },
-    { time: "12 PM", calls: 85, answered: 76, missed: 9 },
-    { time: "1 PM", calls: 52, answered: 47, missed: 5 },
-    { time: "2 PM", calls: 68, answered: 62, missed: 6 },
-    { time: "3 PM", calls: 91, answered: 83, missed: 8 },
-    { time: "4 PM", calls: 73, answered: 68, missed: 5 },
+    { time: "9 AM", received: 45, answered: 38, missed: 7 },
+    { time: "10 AM", received: 62, answered: 55, missed: 7 },
+    { time: "11 AM", received: 78, answered: 71, missed: 7 },
+    { time: "12 PM", received: 85, answered: 76, missed: 9 },
+    { time: "1 PM", received: 52, answered: 47, missed: 5 },
+    { time: "2 PM", received: 68, answered: 62, missed: 6 },
+    { time: "3 PM", received: 91, answered: 83, missed: 8 },
+    { time: "4 PM", received: 73, answered: 68, missed: 5 },
 ]
 
 const agentPerformance = [
@@ -80,9 +80,8 @@ const CalendarComponent = () => {
         days.push(
             <div
                 key={day}
-                className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm cursor-pointer transition-colors ${
-                    isToday ? "bg-blue-600 text-white font-bold" : "hover:bg-gray-100"
-                } ${hasEvent && !isToday ? "bg-green-50 font-semibold text-green-700" : ""}`}
+                className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm cursor-pointer transition-colors ${isToday ? "bg-blue-600 text-white font-bold" : "hover:bg-gray-100"
+                    } ${hasEvent && !isToday ? "bg-green-50 font-semibold text-green-700" : ""}`}
             >
                 <span>{day}</span>
                 {hasEvent && <span className="text-xs mt-0.5">●</span>}
@@ -144,8 +143,8 @@ export default function AdminDashboard() {
             <div className="max-w-[1600px] mx-auto">
                 {/* Header */}
                 <div className="mb-8 animate-fadeIn">
-                    <p className="text-sm text-gray-600 font-medium">Hi Admin,</p>
-                    <h1 className="text-4xl font-bold text-gray-800">Welcome to Echo!</h1>
+                    <p className="text-sm text-gray-600 font-medium">Hi Chamith,</p>
+                    <h1 className="text-4xl font-bold text-gray-800">Welcome to Helixz Echo!</h1>
                     <p className="text-gray-500 mt-1">Friday, November 7, 2025</p>
                 </div>
 
@@ -155,14 +154,17 @@ export default function AdminDashboard() {
                     <div className="xl:col-span-8 space-y-8">
                         {/* Stat Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <StatCard title="Total Calls Today" value="774" change="12.5" icon={Phone} trend="up" />
+                            <StatCard title="Total Calls" value="774" change="12.5" icon={Phone} trend="up" />
                             <StatCard title="Active Agents" value="28" change="8.3" icon={Users} trend="up" />
                             <StatCard title="Avg Response Time" value="32s" change="15.2" icon={Clock} trend="down" />
                         </div>
 
                         {/* Call Volume Chart */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Today's Call Volume</h3>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <Calendar className="w-5 h-5" />
+                                Call Volume
+                            </h3>
                             <ResponsiveContainer width="100%" height={300}>
                                 <LineChart data={callVolumeData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -170,7 +172,7 @@ export default function AdminDashboard() {
                                     <YAxis stroke="#9ca3af" />
                                     <Tooltip />
                                     <Legend />
-                                    <Line type="monotone" dataKey="calls" stroke="#3b82f6" strokeWidth={2} dot={{ fill: "#3b82f6" }} />
+                                    <Line type="monotone" dataKey="received" stroke="#3b82f6" strokeWidth={2} dot={{ fill: "#3b82f6" }} />
                                     <Line type="monotone" dataKey="answered" stroke="#10b981" strokeWidth={2} dot={{ fill: "#10b981" }} />
                                     <Line type="monotone" dataKey="missed" stroke="#ef4444" strokeWidth={2} dot={{ fill: "#ef4444" }} />
                                 </LineChart>
@@ -202,7 +204,7 @@ export default function AdminDashboard() {
                                             cx="50%"
                                             cy="50%"
                                             labelLine={false}
-                                            outerRadius={90}
+                                            outerRadius={70}
                                             fill="#8884d8"
                                             dataKey="value"
                                             label={(entry: any) => {
