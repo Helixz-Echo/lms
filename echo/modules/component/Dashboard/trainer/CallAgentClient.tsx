@@ -9,7 +9,8 @@ const CallAgentClient: React.FC = () => {
   const [currentInputTranscription, setCurrentInputTranscription] = useState<string>('');
   const [currentOutputTranscription, setCurrentOutputTranscription] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [conversationSummary, setConversationSummary] = useState<string>(''); // New state for summary
+  const [conversationSummary, setConversationSummary] = useState<string>('');
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isConnectingRef = useRef<boolean>(false); // To prevent multiple connect calls
 
@@ -62,10 +63,12 @@ const CallAgentClient: React.FC = () => {
       ]);
       alert(`Conversation Error: ${error.message}. Please try again.`);
       isConnectingRef.current = false;
-      setConversationSummary(''); // Clear summary on error
+      setConversationSummary('');
+      setIsSummaryModalOpen(false);
     },
-    onSummary: (summary: string) => { // New callback handler
+    onSummary: (summary: string) => {
       setConversationSummary(summary);
+      setIsSummaryModalOpen(true);
     },
   }).current; // Use .current to ensure stable reference for useCallback
 
@@ -76,6 +79,7 @@ const CallAgentClient: React.FC = () => {
     setCurrentOutputTranscription('');
     setMessages([]);
     setConversationSummary(''); // Clear previous summary
+    setIsSummaryModalOpen(false);
     try {
       await connectLiveSession(liveSessionCallbacks);
     } catch (error) {
@@ -97,14 +101,14 @@ const CallAgentClient: React.FC = () => {
     switch (state) {
       case ConversationState.IDLE:
       case ConversationState.ERROR:
-        return 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+        return 'bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 focus:ring-gray-500';
       case ConversationState.CONNECTING:
       case ConversationState.SUMMARIZING: // Added for summarizing state
         return 'bg-gray-400 cursor-not-allowed';
       case ConversationState.LISTENING:
       case ConversationState.SPEAKING:
       case ConversationState.CLOSING:
-        return 'bg-red-600 hover:bg-red-700 focus:ring-red-500';
+        return 'bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 focus:ring-red-500';
       default:
         return 'bg-gray-500';
     }
@@ -140,101 +144,147 @@ const CallAgentClient: React.FC = () => {
   ].includes(conversationState);
 
   return (
-    <div className="flex flex-col h-full w-full  bg-white overflow-hidden ">
-      {/* Header */}
-      <div className=" bg-[#231ad4] p-4 text-white text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight">
-          <span className="block">Helixz Call Center Agent</span>
-        </h1>
-      </div>
+    <div className="flex h-full w-full min-h-0 flex-col overflow-hidden">
 
       {/* Main Conversation Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm text-gray-800 bg-gray-50">
-        {messages.length === 0 && !isConversationActive && !currentInputTranscription && !currentOutputTranscription && !conversationSummary && (
-          <div className="flex items-center justify-center h-full text-gray-500 italic">
-            Start a conversation to begin...
-          </div>
-        )}
+      <div className="flex flex-1 min-h-0 flex-col overflow-y-auto">
+        <div className="mx-auto flex w-full flex-1 min-h-0 flex-col space-y-4 text-sm text-[#3D2D4C]">
+          {messages.length === 0 && !isConversationActive && !currentInputTranscription && !currentOutputTranscription && !conversationSummary && (
+            <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-[#7B93DB]/40 bg-white/80 p-8 text-center shadow-inner">
+              <p className="text-base font-semibold text-gray-500">Start a conversation to begin</p>
+            </div>
+          )}
 
-        {conversationSummary && conversationState === ConversationState.IDLE && (
-          <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg shadow-md mb-4 break-words whitespace-pre-wrap">
-            <h3 className="font-bold text-lg mb-2">Conversation Summary:</h3>
-            <p>{conversationSummary}</p>
-          </div>
-        )}
-
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[75%] px-4 py-2 rounded-lg shadow-md relative ${
-                message.sender === 'user'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-green-100 text-green-800'
-              }`}
-            >
-              <div className="font-semibold text-xs mb-1">
-                {message.sender === 'user' ? 'You' : 'Agent'}
-              </div>
-              <p className="break-words whitespace-pre-wrap">{message.text}</p>
-              <div className="absolute bottom-1 right-2 text-xs text-gray-400">
-                {message.timestamp}
+          {messages.map((message) => (
+            <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`flex max-w-[85%] gap-3 ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                    message.sender === 'user'
+                      ? 'bg-gradient-to-r from-gray-900 to-gray-700'
+                      : 'bg-gradient-to-r from-orange-500 to-red-500'
+                  } shadow-lg`}
+                >
+                  <span className="text-xs font-bold text-white">{message.sender === 'user' ? 'YOU' : 'AGENT'}</span>
+                </div>
+                <div
+                  className={`rounded-2xl px-4 py-3 shadow-md ${
+                    message.sender === 'user'
+                      ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
+                      : 'border border-gray-200 bg-white text-[#3D2D4C]'
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed md:text-base">{message.text}</p>
+                  <p className={`mt-1 text-xs ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>{message.timestamp}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {currentInputTranscription && (
-          <div className="flex justify-end">
-            <div className="max-w-[75%] px-4 py-2 rounded-lg shadow-md bg-blue-50 text-blue-700 italic animate-pulse">
-              <div className="font-semibold text-xs mb-1">You (transcribing)</div>
-              <p className="break-words whitespace-pre-wrap">{currentInputTranscription}</p>
+          {currentInputTranscription && (
+            <div className="flex justify-end">
+              <div className="flex max-w-[85%] gap-3 flex-row-reverse">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-gray-900 to-gray-700 shadow-lg">
+                  <span className="text-xs font-bold text-white">YOU</span>
+                </div>
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 shadow-md">
+                  <div className="mb-1 text-xs font-semibold text-gray-500">You (transcribing)</div>
+                  <p className="whitespace-pre-wrap">{currentInputTranscription}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {currentOutputTranscription && (
-          <div className="flex justify-start">
-            <div className="max-w-[75%] px-4 py-2 rounded-lg shadow-md bg-green-50 text-green-700 italic animate-pulse">
-              <div className="font-semibold text-xs mb-1">Agent (transcribing)</div>
-              <p className="break-words whitespace-pre-wrap">{currentOutputTranscription}</p>
+          {currentOutputTranscription && (
+            <div className="flex justify-start">
+              <div className="flex max-w-[85%] gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+                  <span className="text-xs font-bold text-white">AGENT</span>
+                </div>
+                <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-orange-800 shadow-md">
+                  <div className="mb-1 text-xs font-semibold">Agent (transcribing)</div>
+                  <p className="whitespace-pre-wrap">{currentOutputTranscription}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* Control Panel */}
-      <div className="sticky bottom-0 bg-white p-4 border-t border-gray-200 flex flex-col items-center">
-        <div className="flex items-center space-x-2 mb-4 text-gray-600 font-medium">
-          <div
-            className={`w-3 h-3 rounded-full ${
-              conversationState === ConversationState.LISTENING
-                ? 'bg-green-500 animate-pulse'
-                : conversationState === ConversationState.SPEAKING
-                ? 'bg-purple-500 animate-bounce'
-                : conversationState === ConversationState.CONNECTING || conversationState === ConversationState.SUMMARIZING
-                ? 'bg-yellow-500 animate-spin'
-                : 'bg-gray-400'
-            }`}
-          ></div>
-          <span>Status: {getStatusText(conversationState)}</span>
-        </div>
+      <div className="mt-4 border-t border-gray-200 bg-white/80 p-4 md:p-6">
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
+            <div
+              className={`h-3 w-3 rounded-full ${
+                conversationState === ConversationState.LISTENING
+                  ? 'bg-green-500 animate-pulse'
+                  : conversationState === ConversationState.SPEAKING
+                  ? 'bg-purple-500 animate-bounce'
+                  : conversationState === ConversationState.CONNECTING || conversationState === ConversationState.SUMMARIZING
+                  ? 'bg-yellow-500 animate-spin'
+                  : 'bg-gray-400'
+              }`}
+            ></div>
+            <span>Status: {getStatusText(conversationState)}</span>
+          </div>
 
-        <button
-          onClick={isConversationActive ? handleStopConversation : handleStartConversation}
-          disabled={conversationState === ConversationState.CONNECTING || conversationState === ConversationState.CLOSING || conversationState === ConversationState.SUMMARIZING}
-          className={`w-full py-3 px-6 rounded-full text-white text-lg font-bold shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 ${getButtonClass(conversationState)}`}
-        >
-          {isConversationActive ? 'Stop Conversation' : 'Start Conversation'}
-        </button>
-        <p className="mt-2 text-xs text-gray-500">
-          Supports Sinhala, English, Tamil, and a mix of these languages.
-        </p>
+          <button
+            onClick={isConversationActive ? handleStopConversation : handleStartConversation}
+            disabled={conversationState === ConversationState.CONNECTING || conversationState === ConversationState.CLOSING || conversationState === ConversationState.SUMMARIZING}
+            className={`w-full max-w-xs rounded-2xl py-3 px-6 text-lg font-semibold text-white shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 ${getButtonClass(conversationState)}`}
+          >
+            {isConversationActive ? 'Stop Conversation' : 'Start Conversation'}
+          </button>
+          {conversationSummary && (
+            <button
+              type="button"
+              onClick={() => setIsSummaryModalOpen(true)}
+              className="text-sm font-medium text-[#3D2D4C] underline-offset-4 hover:underline"
+            >
+              View last summary
+            </button>
+          )}
+          <p className="text-center text-xs text-gray-500">
+            Supports Sinhala, English, Tamil, and mixed utterances.
+          </p>
+        </div>
       </div>
+
+      {conversationSummary && isSummaryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#7B93DB]">Session Recap</p>
+                <h3 className="text-xl font-semibold text-[#3D2D4C]">Conversation Summary</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSummaryModalOpen(false)}
+                className="rounded-full p-2 text-gray-500 transition hover:bg-gray-100"
+                aria-label="Close summary"
+              >
+                <span className="text-lg">&times;</span>
+              </button>
+            </div>
+            <div className="mt-4 max-h-[50vh] overflow-y-auto rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-[#3D2D4C]/90">
+              <p className="whitespace-pre-wrap leading-relaxed">{conversationSummary}</p>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsSummaryModalOpen(false)}
+                className="rounded-xl bg-gradient-to-r from-gray-900 to-gray-700 px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:from-gray-800 hover:to-gray-600"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
