@@ -14,14 +14,14 @@ export default function UploadPage() {
                 {/* Upload Grid */}
                 <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-min">
                     {/* General Documents */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                    {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
                         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">General Documents</h2>
                         <p className="text-xs sm:text-sm text-gray-500 mb-4">Upload CSV files for Knowledge Base</p>
                         <Uploader/>
-                    </div>
+                    </div> */}
 
                     {/* Training Sessions */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:col-span-2">
                         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">Training Sessions</h2>
                         <p className="text-xs sm:text-sm text-gray-500 mb-4">Upload CSV with embeddings</p>
                         <TrainingSessionUploader />
